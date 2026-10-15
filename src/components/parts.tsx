@@ -26,12 +26,18 @@ export function PathCard({ path }: { path: ConflictPath }) {
   const kindLabel = path.kind.replace(/_/g, " ");
   return (
     <div className="rounded-lg border border-red-200 bg-white p-4 shadow-sm">
-      <div className="mb-3 flex items-center gap-2">
-        <span className={`rounded px-2 py-0.5 text-xs font-bold uppercase ${path.severity === "conflict" ? "bg-red-600 text-white" : "bg-amber-500 text-white"}`}>
-          {path.severity}
+      <div className="mb-3 flex flex-wrap items-center gap-2">
+        <span className={`rounded px-2 py-0.5 text-xs font-bold uppercase ${path.wall ? "bg-indigo-600 text-white" : path.severity === "conflict" ? "bg-red-600 text-white" : "bg-amber-500 text-white"}`}>
+          {path.wall ? "walled" : path.severity}
         </span>
         <span className="text-sm font-medium text-zinc-700">{kindLabel}</span>
-        {path.waivable && <span className="text-xs text-zinc-500">waivable with consent</span>}
+        {path.wall ? (
+          <span className="text-xs font-medium text-indigo-700">
+            ethical wall in place since {path.wall.since} (screened: {path.wall.screened.join(", ") || "—"}) — approved by {path.wall.by}
+          </span>
+        ) : (
+          path.waivable && <span className="text-xs text-zinc-500">waivable with consent</span>
+        )}
       </div>
       <div className="flex flex-wrap items-center gap-y-2">
         {path.hops.map((h, i) => (

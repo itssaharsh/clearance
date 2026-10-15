@@ -18,6 +18,7 @@ export const ResolvedParty = z.object({
   party: Party,
   nodeId: z.string().nullable(), // graph node key when matched
   canonicalName: z.string().nullable(),
+  candidateKey: z.string().nullable().default(null), // best candidate's key when uncertain (for attorney resolution)
   confidence: z.number().min(0).max(1),
   status: ResolutionStatus,
 });
@@ -35,13 +36,27 @@ export const PathHop = z.object({
 });
 export type PathHop = z.infer<typeof PathHop>;
 
+export const WallInfo = z.object({
+  screened: z.array(z.string()),
+  by: z.string(),
+  since: z.string(),
+});
+export type WallInfo = z.infer<typeof WallInfo>;
+
 export const ConflictPath = z.object({
   id: z.string(),
   kind: z.enum(["direct_adversity", "corporate_family", "related_person", "declined_consult", "wall"]),
   severity: z.enum(["conflict", "caution"]),
   waivable: z.boolean(),
   hops: z.array(PathHop).min(1),
+  wall: WallInfo.nullable().default(null), // an ethical wall already stands around the terminal matter
 });
+
+export const WallProposal = z.object({
+  matterNames: z.array(z.string()),
+  screened: z.array(z.object({ name: z.string(), reason: z.string() })),
+});
+export type WallProposal = z.infer<typeof WallProposal>;
 export type ConflictPath = z.infer<typeof ConflictPath>;
 
 export const MatterStatus = z.enum(["blocked", "cleared", "walled", "declined"]);

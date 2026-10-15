@@ -1,6 +1,8 @@
 import { notFound } from "next/navigation";
 import { getMatter } from "@/lib/intake";
+import { proposeWall } from "@/lib/decide";
 import { BaselinePanel, PartyChips, PathCard, StatusBadge } from "@/components/parts";
+import { DecisionPanel } from "@/components/DecisionPanel";
 
 export const dynamic = "force-dynamic";
 
@@ -17,6 +19,15 @@ export default async function MatterPage({ params }: { params: Promise<{ id: str
     );
   }
   if (!report) notFound();
+
+  let proposal = null;
+  if (report.status === "blocked" && report.paths.length > 0) {
+    try {
+      proposal = await proposeWall(report);
+    } catch {
+      proposal = null; // graph hiccup: the wall option simply isn't offered; clear/decline still gated by sign-off
+    }
+  }
 
   return (
     <div>
@@ -68,6 +79,10 @@ export default async function MatterPage({ params }: { params: Promise<{ id: str
             <BaselinePanel baseline={report.baseline} />
           </div>
         </div>
+      </section>
+
+      <section className="mt-6">
+        <DecisionPanel report={report} proposal={proposal} />
       </section>
 
       <section className="mt-6 rounded-lg border border-zinc-200 bg-white p-4">

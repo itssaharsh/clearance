@@ -37,7 +37,7 @@ export async function resolveAgainstDirectory(party: Party, directory: Directory
   // 1) exact normalized name
   const exact = directory.find((d) => normalizeName(d.name) === norm);
   if (exact) {
-    return { party, nodeId: exact.key, canonicalName: exact.name, confidence: 1, status: "matched" };
+    return { party, nodeId: exact.key, canonicalName: exact.name, candidateKey: exact.key, confidence: 1, status: "matched" };
   }
 
   // 2) similarity: embedding cosine, lifted by a deterministic lexical affinity
@@ -48,17 +48,17 @@ export async function resolveAgainstDirectory(party: Party, directory: Directory
     .sort((a, b) => b.score - a.score);
   const best = scored[0];
   const runnerUp = scored[1]?.score ?? 0;
-  if (!best) return { party, nodeId: null, canonicalName: null, confidence: 0, status: "new" };
+  if (!best) return { party, nodeId: null, canonicalName: null, candidateKey: null, confidence: 0, status: "new" };
 
   const cls = classifyMatch(best.score, runnerUp);
   if (cls === "matched") {
-    return { party, nodeId: best.d.key, canonicalName: best.d.name, confidence: round(best.score), status: "matched" };
+    return { party, nodeId: best.d.key, canonicalName: best.d.name, candidateKey: best.d.key, confidence: round(best.score), status: "matched" };
   }
   if (cls === "uncertain") {
     // fails closed: no nodeId — the attorney resolves it (ask-once alias memory writes ALIAS_OF, T05)
-    return { party, nodeId: null, canonicalName: best.d.name, confidence: round(best.score), status: "uncertain" };
+    return { party, nodeId: null, canonicalName: best.d.name, candidateKey: best.d.key, confidence: round(best.score), status: "uncertain" };
   }
-  return { party, nodeId: null, canonicalName: null, confidence: round(best.score), status: "new" };
+  return { party, nodeId: null, canonicalName: null, candidateKey: null, confidence: round(best.score), status: "new" };
 }
 
 function round(x: number): number {

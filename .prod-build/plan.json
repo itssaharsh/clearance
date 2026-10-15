@@ -250,8 +250,15 @@
         "npm test"
       ],
       "rollback": "git revert the T05 commits",
-      "status": "todo",
-      "notes": ""
+      "status": "done",
+      "notes": "",
+      "base": "a3a63ca",
+      "started_after": 21,
+      "evidence": [
+        "E0022",
+        "E0023",
+        "E0024"
+      ]
     },
     {
       "id": "T06",

@@ -52,11 +52,33 @@ export async function conflictPathsFor(nodeKey: string): Promise<ConflictPath[]>
   const all = [...direct, ...indirect].map(toConflictPath);
   // de-duplicate identical paths (alias loops can produce mirrors)
   const seen = new Set<string>();
-  return all.filter((p) => {
+  const unique = all.filter((p) => {
     const sig = p.hops.map((h) => `${h.from}|${h.rel}|${h.to}`).join(">");
     if (seen.has(sig)) return false;
     seen.add(sig);
     return true;
+  });
+  return annotateWalls(unique);
+}
+
+/** A standing ethical wall around a terminal matter downgrades the path: shown, screened, handled (T05). */
+async function annotateWalls(paths: ConflictPath[]): Promise<ConflictPath[]> {
+  const matters = [...new Set(paths.map((p) => p.hops[p.hops.length - 1].to))];
+  const walls = new Map<string, { screened: string[]; by: string; since: string }>();
+  for (const m of matters) {
+    const rows = await roQuery<{ by: string; at: string; screened: string[] }>(
+      `MATCH (w:Wall)-[:AROUND]->(m:Matter {name: $m})
+       OPTIONAL MATCH (w)-[:SCREENED_BY]->(a:Attorney)
+       RETURN w.by AS by, w.at AS at, collect(a.name) AS screened LIMIT 5`,
+      { m },
+    );
+    if (rows.length > 0) {
+      walls.set(m, { screened: (rows[0].screened ?? []).filter(Boolean), by: rows[0].by, since: (rows[0].at ?? "").slice(0, 10) });
+    }
+  }
+  return paths.map((p) => {
+    const w = walls.get(p.hops[p.hops.length - 1].to);
+    return w ? { ...p, wall: { screened: w.screened, by: w.by, since: w.since } } : p;
   });
 }
 
