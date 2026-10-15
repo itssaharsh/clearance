@@ -502,7 +502,7 @@
       ],
       "rollback": "n/a",
       "status": "todo",
-      "notes": "submit with >=1h in hand. Tracks: enter T01 + T03 + T02 AS-IS (alias memory + wall writeback = cross-session shared memory; no precedent feature needed - stretch cancelled as scope risk with no judge-visible payoff). Eval language = seeded demonstration. Ask-the-firm stays a footnote, never a headline."
+      "notes": "submit with >=1h in hand. Tracks: enter T01 + T03 + T02 AS-IS (alias memory + wall writeback = cross-session shared memory; no precedent feature needed - stretch cancelled as scope risk with no judge-visible payoff). Eval language = seeded demonstration. Ask-the-firm stays a footnote, never a headline. | NEWER SKILL GEN (downloads, Oct 15 17:14) adopted for final checks: run the downloaded pb.py submit check too (H63: passes nothing it did not read) and downloaded foldcheck.py; H54 hard-rules ledger for Rule 10, each with proof at HEAD: public repo (remote visibility=public), README graph data model (README#The graph data model), the Cypher the product depends on (README#The Cypher), demo video link present+opens signed out (dq-level: required artifact), live deployment URL opens signed out, track names on the form (T01+T02+T03). Tablekeeper failure mode to avoid: required artifact missing at last commit / bracket placeholders in judge-facing files."
     }
   ],
   "base": "e4f142a"
