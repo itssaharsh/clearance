@@ -37,14 +37,19 @@ export class MockExtractor implements Extractor {
       if (!parties.has(clean.toLowerCase())) parties.set(clean.toLowerCase(), Party.parse({ name: clean, kind, role }));
     };
 
-    // "<X> wants to sue <Y>", "<X> v. <Y>", "against <Y>", "represent <X>"
-    const sue = text.match(/(.+?)\s+(?:wants to sue|is suing|sues|v\.|vs\.?|against)\s+(.+?)(?:[.;\n]|$)/i);
-    if (sue) {
-      for (const n of properNounRuns(sue[1])) add(n, "prospective_client");
-      for (const n of properNounRuns(sue[2])) add(n, "adverse");
+    // Work sentence by sentence; a period ends a sentence only after a 2+-letter
+    // word, so initials ("R. Kane") never truncate the adverse party.
+    const sentences = text.split(/(?<=[A-Za-z]{2}[.!?])\s+/);
+    for (const sent of sentences) {
+      // "<X> wants to sue <Y>", "<X> v. <Y>", "against <Y>", "pursue <Y>"
+      const sue = sent.match(/(.+?)\s+(?:wants to sue|is suing|sues|v\.|vs\.?|against|to pursue|pursuing|to recover from)\s+(.+?)(?:[;\n]|$)/i);
+      if (sue) {
+        for (const n of properNounRuns(sue[1])) add(n, "prospective_client");
+        for (const n of properNounRuns(sue[2])) add(n, "adverse");
+      }
+      const rep = sent.match(/represent(?:ing)?\s+(.+?)(?:[;\n]|$)/i);
+      if (rep) for (const n of properNounRuns(rep[1])) add(n, "prospective_client");
     }
-    const rep = text.match(/represent(?:ing)?\s+(.+?)(?:[.;\n]|$)/i);
-    if (rep) for (const n of properNounRuns(rep[1])) add(n, "prospective_client");
     // everything else capitalized becomes "other" so resolution still sees it
     for (const n of properNounRuns(text)) if (![...parties.keys()].includes(n.toLowerCase())) add(n, "other");
 

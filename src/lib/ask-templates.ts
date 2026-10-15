@@ -25,7 +25,8 @@ export const ASK_TEMPLATES: AskTemplate[] = [
              MATCH (o)-[:ALIAS_OF|SUBSIDIARY_OF*0..2]-(fam)
              MATCH (fam)-[t:CLIENT_IN|ADVERSE_IN|DECLINED_CONSULT|WITNESS_IN]->(m:Matter)
              OPTIONAL MATCH (att:Attorney)-[:WORKED_ON]->(m)
-             RETURN DISTINCT fam.name AS a, labels(fam)[0] AS aKind, type(t) AS rel, t.source AS source,
+             RETURN DISTINCT o.name AS origin, labels(o)[0] AS originKind,
+                    fam.name AS a, labels(fam)[0] AS aKind, type(t) AS rel, t.source AS source,
                     m.name AS b, 'Matter' AS bKind, att.name AS attorney
              LIMIT 30`,
   },
@@ -63,7 +64,7 @@ export const ASK_TEMPLATES: AskTemplate[] = [
   },
 ];
 
-type Row = { a: string; aKind: string; rel: string; source: string; b: string; bKind: string; attorney: string | null };
+type Row = { a: string; aKind: string; rel: string; source: string; b: string; bKind: string; attorney: string | null; origin?: string | null; originKind?: string | null };
 
 export async function runAsk(templateId: string, param: string): Promise<AskResult> {
   const t = ASK_TEMPLATES.find((x) => x.id === templateId);
@@ -76,6 +77,10 @@ export async function runAsk(templateId: string, param: string): Promise<AskResu
   const citations = new Set<string>();
   for (const r of rows) {
     nodes.set(r.a, { id: r.a, label: r.a, kind: r.aKind });
+    if (r.origin && r.origin !== r.a) {
+      nodes.set(r.origin, { id: r.origin, label: r.origin, kind: r.originKind ?? "Org" });
+      edges.push({ from: r.origin, to: r.a, rel: "SAME_FAMILY", source: "alias / subsidiary chain" });
+    }
     nodes.set(r.b, { id: r.b, label: r.b, kind: r.bKind });
     edges.push({ from: r.a, to: r.b, rel: r.rel, source: r.source ?? "" });
     if (r.bKind === "Matter") citations.add(r.b);

@@ -6,5 +6,7 @@ export default defineConfig({
   test: {
     environment: "node",
     include: ["tests/unit/**/*.test.ts", "tests/int/**/*.test.ts"],
+    // integration files share ONE live graph and each resets it: never run files in parallel
+    fileParallelism: false,
   },
 });
