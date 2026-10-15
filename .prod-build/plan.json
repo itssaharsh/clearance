@@ -115,8 +115,15 @@
         "npm test"
       ],
       "rollback": "git revert; no persistent state outside demo graph",
-      "status": "todo",
-      "notes": ""
+      "status": "done",
+      "notes": "",
+      "base": "9ee8727",
+      "started_after": 3,
+      "evidence": [
+        "E0004",
+        "E0005",
+        "E0006"
+      ]
     },
     {
       "id": "T03",
