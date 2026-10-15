@@ -356,8 +356,13 @@
         "observe: pb.py smoke on live URL green; console and network clean; 390/1440 pass"
       ],
       "rollback": "Vercel rollback to previous deployment",
-      "status": "todo",
-      "notes": "BLOCKED on A-1 (FALKORDB_URL from Saharsh) until provided"
+      "status": "done",
+      "notes": "BLOCKED on A-1 (FALKORDB_URL from Saharsh) until provided",
+      "evidence": [
+        "E0052",
+        "E0053",
+        "E0054"
+      ]
     },
     {
       "id": "T09",
@@ -438,10 +443,16 @@
         "observe: review report saved to .prod-build/reports/"
       ],
       "rollback": "git revert fix commits individually",
-      "status": "doing",
+      "status": "done",
       "notes": "",
       "base": "3becca3",
-      "started_after": 33
+      "started_after": 33,
+      "evidence": [
+        "E0055",
+        "E0056",
+        "E0057",
+        "E0058"
+      ]
     },
     {
       "id": "T12",
