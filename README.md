@@ -63,6 +63,10 @@ RETURN fam.name, type(t), t.source, m.name, att.name LIMIT 30
 ```
 All reads run through `GRAPH.RO_QUERY` with a 3-second timeout and a bounded-result guard (`npm run lint:graph` enforces that no query bypasses the graph layer).
 
+## The agent loop (and the human gate)
+
+Clearance is an agent with one irreversible action — opening a matter — and a human gate in front of it. The loop: an intake note is ingested, parties are extracted, identities are resolved against the firm graph (an ambiguity asks a human once and is remembered forever as an `ALIAS_OF` edge), the graph is traversed for conflict paths, the matter is **blocked**, an attorney signs clear / decline / wall, and the decision is written back — so every future check knows what this one learned. Memory here changes future *verdicts*, not future chats: an approved ethical wall visibly annotates later checks, and a resolved alias never asks again, for any attorney at the firm.
+
 ## Where the model is — and where it is not
 
 The LLM does exactly one job: reading the parties out of a messy intake note (`src/lib/extract.ts`; a deterministic mock ships for demo-safe, key-free operation — `/api/health` reports which is live). Everything that decides is model-free and replayable: entity resolution is three auditable rules (an exact normalized name auto-matches; a shared surname with matching initials, or an org name whose every word appears in a record's name, asks the attorney once and is remembered as an `ALIAS_OF` edge; everything else is new), and the verdict is the traversal above. The model cannot talk the gate open: uncertain identity blocks, a graph outage blocks, and only a signature clears.
@@ -81,8 +85,8 @@ Optional: `ANTHROPIC_API_KEY` for live extraction (`EXTRACTOR=mock` forces the d
 
 ## Honest limits
 
-- The demo firm is **synthetic** (Rule 6 bars real client data; law-firm records are confidential by nature). The corpus generator is deterministic and the planted-conflict manifest is public in `src/lib/corpus-spec.ts` — the eval is reproducible, not curated.
-- The name-search baseline legitimately finds direct records (6 of 10 planted conflicts); what it can never see are the indirect ones — subsidiary, alias, family, officer — which is exactly the malpractice gap.
+- The demo firm is **synthetic** (Rule 6 bars real client data; law-firm records are confidential by nature). `npm run eval` runs a **seeded demonstration corpus**, not an independent benchmark: the generator is deterministic and the planted-conflict manifest is public in `src/lib/corpus-spec.ts`, so the result is reproducible by one command — and honestly framed: the 4 conflicts name search misses are *structural* (they exist only as graph edges a literal search cannot see), not statistical.
+- Relationship-aware conflicts exist at enterprise price: Intapp buys corporate-tree data and sells to big law. Agentic checkers exist too: Gamut's intake template searches Clio/PACER in parallel and lets a model sort findings into tiers. Clearance's claim is the method at the small-firm scale: the firm's **own** provenance graph, deterministic replayable verdicts, a fails-closed gate, and ask-once memory — Gamut searches more places; Clearance proves the verdict.
 - Rate limits are in-memory per instance (fine for a demo; a real deployment would move them to the graph).
 - No auth by design: judges must not sign in. A real firm deployment would add it.
 
