@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" role="img"><title>Clearance</title>
+<style>.m{stroke:#1B2237}.a{fill:#1C4FD1}@media (prefers-color-scheme:dark){.m{stroke:#F7F4EE}.a{fill:#6E8EF2}}</style>
+<!-- two nodes joined by the found path; the gate bar beneath -->
+<circle cx="12" cy="18" r="6" fill="none" class="m" stroke-width="4"/>
+<circle cx="36" cy="18" r="6" fill="none" class="m" stroke-width="4"/>
+<line x1="18" y1="18" x2="30" y2="18" class="m" stroke-width="4"/>
+<rect x="8" y="34" width="32" height="6" class="a"/>
+</svg>

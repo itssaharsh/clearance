@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import type { MatterReport, WallProposal } from "@/lib/schemas";
+import { StatusBadge } from "@/components/parts";
 
 export function DecisionPanel({ report, proposal }: { report: MatterReport; proposal: WallProposal | null }) {
   const router = useRouter();
@@ -14,8 +15,9 @@ export function DecisionPanel({ report, proposal }: { report: MatterReport; prop
 
   if (report.status !== "blocked") {
     return (
-      <div className="rounded-lg border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-900">
-        Signed and on record: {report.blockedReason}
+      <div className="flex items-center gap-3 rounded-lg border border-success/40 bg-surface-2 p-4 text-sm text-success">
+        <StatusBadge status={report.status} stamp />
+        <span>Signed and on record: {report.blockedReason}</span>
       </div>
     );
   }
@@ -55,13 +57,13 @@ export function DecisionPanel({ report, proposal }: { report: MatterReport; prop
   const needsAliasChoices = report.uncertain.some((u) => !aliasChoice[u.party.name]);
 
   return (
-    <div className="rounded-lg border border-zinc-300 bg-white p-4">
-      <h2 className="text-sm font-semibold uppercase tracking-wide text-zinc-700">Attorney decision</h2>
-      <p className="mt-1 text-xs text-zinc-500">The matter stays blocked until someone signs. The signature is written back as the firm's record.</p>
+    <div className="rounded-lg border border-line-input bg-surface-1 p-4">
+      <h2 className="text-sm font-semibold uppercase tracking-wide text-ink">Attorney decision</h2>
+      <p className="mt-1 text-xs text-ink-muted">The matter stays blocked until someone signs. The signature is written back as the firm's record.</p>
 
       {report.uncertain.length > 0 && (
-        <div className="mt-3 rounded-md border border-amber-300 bg-amber-50 p-3">
-          <p className="text-xs font-semibold text-amber-900">Resolve uncertain identities first (remembered — never asked again):</p>
+        <div className="mt-3 rounded-md border border-caution/50 bg-surface-2 p-3">
+          <p className="text-xs font-semibold text-caution">Resolve uncertain identities first (remembered — never asked again):</p>
           {report.uncertain.map((u) => (
             <div key={u.party.name} className="mt-2 text-sm">
               <span className="font-medium">“{u.party.name}”</span>
@@ -87,8 +89,8 @@ export function DecisionPanel({ report, proposal }: { report: MatterReport; prop
       )}
 
       {proposal && proposal.screened.length > 0 && (
-        <div className="mt-3 rounded-md border border-indigo-200 bg-indigo-50 p-3">
-          <p className="text-xs font-semibold text-indigo-900">Proposed ethical wall (from WORKED_ON edges):</p>
+        <div className="mt-3 rounded-md border border-wall/30 bg-surface-2 p-3">
+          <p className="text-xs font-semibold text-wall">Proposed ethical wall (from WORKED_ON edges):</p>
           {proposal.screened.map((s) => (
             <label key={s.name} className="mt-1 flex items-center gap-2 text-sm">
               <input
@@ -97,7 +99,7 @@ export function DecisionPanel({ report, proposal }: { report: MatterReport; prop
                 onChange={(e) => setScreened((cur) => (e.target.checked ? [...cur, s.name] : cur.filter((n) => n !== s.name)))}
               />
               <span className="font-medium">{s.name}</span>
-              <span className="text-xs text-zinc-500">{s.reason}</span>
+              <span className="text-xs text-ink-muted">{s.reason}</span>
             </label>
           ))}
         </div>
@@ -108,13 +110,13 @@ export function DecisionPanel({ report, proposal }: { report: MatterReport; prop
           value={by}
           onChange={(e) => setBy(e.target.value)}
           placeholder="Attorney name (signs the record)"
-          className="w-64 rounded-md border border-zinc-300 px-3 py-2 text-sm"
+          className="w-64 rounded-md border border-line-input px-3 py-2 text-sm"
         />
         <button
           type="button"
           disabled={!!busy || by.trim().length < 2 || report.uncertain.length > 0 && needsAliasChoices}
           onClick={() => decide("clear")}
-          className="rounded-md bg-emerald-700 px-4 py-2 text-sm font-semibold text-white disabled:bg-zinc-300"
+          className="rounded-md bg-success px-4 py-2 text-sm font-semibold text-accent-ink disabled:bg-line-input"
         >
           {busy === "clear" ? "Signing…" : "Sign: clear"}
         </button>
@@ -122,7 +124,7 @@ export function DecisionPanel({ report, proposal }: { report: MatterReport; prop
           type="button"
           disabled={!!busy || by.trim().length < 2 || !proposal || screened.length === 0}
           onClick={() => decide("wall")}
-          className="rounded-md bg-amber-600 px-4 py-2 text-sm font-semibold text-white disabled:bg-zinc-300"
+          className="rounded-md bg-caution px-4 py-2 text-sm font-semibold text-accent-ink disabled:bg-line-input"
         >
           {busy === "wall" ? "Raising wall…" : "Approve wall"}
         </button>
@@ -130,12 +132,12 @@ export function DecisionPanel({ report, proposal }: { report: MatterReport; prop
           type="button"
           disabled={!!busy || by.trim().length < 2}
           onClick={() => decide("decline")}
-          className="rounded-md bg-zinc-700 px-4 py-2 text-sm font-semibold text-white disabled:bg-zinc-300"
+          className="rounded-md bg-ink px-4 py-2 text-sm font-semibold text-accent-ink disabled:bg-line-input"
         >
           {busy === "decline" ? "Declining…" : "Decline the matter"}
         </button>
       </div>
-      {error && <p className="mt-2 rounded-md border border-red-300 bg-red-50 p-2 text-sm text-red-800">{error}</p>}
+      {error && <p className="mt-2 rounded-md border border-danger/40 bg-danger-container p-2 text-sm text-danger">{error}</p>}
     </div>
   );
 }

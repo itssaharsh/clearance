@@ -11,8 +11,8 @@ const TEMPLATES: Array<{ id: string; label: string; paramLabel: string | null; d
 ];
 
 const KIND_TONE: Record<string, string> = {
-  Matter: "border-indigo-300 bg-indigo-50",
-  Attorney: "border-emerald-300 bg-emerald-50",
+  Matter: "border-accent/40 bg-accent-container",
+  Attorney: "border-success/40 bg-surface-2",
 };
 
 export default function AskPage() {
@@ -44,8 +44,8 @@ export default function AskPage() {
 
   return (
     <div className="mx-auto max-w-3xl">
-      <h1 className="text-2xl font-bold tracking-tight">Ask the firm</h1>
-      <p className="mt-1 text-sm text-zinc-600">
+      <h1 className="font-display text-2xl tracking-tight">Ask the firm</h1>
+      <p className="mt-1 text-sm text-ink-muted">
         Institutional memory as queries: every answer is a subgraph, and every claim cites the matter it comes from. No free-form chat — the same question returns the same answer, twice.
       </p>
 
@@ -59,7 +59,7 @@ export default function AskPage() {
               setParam(t.defaultParam);
               setResult(null);
             }}
-            className={`rounded-full border px-3 py-1 text-xs font-medium ${t.id === tid ? "border-zinc-900 bg-zinc-900 text-white" : "border-zinc-300 bg-white text-zinc-700 hover:border-zinc-500"}`}
+            className={`rounded-full border px-3 py-1 text-xs font-medium ${t.id === tid ? "border-accent bg-accent text-accent-ink" : "border-line-input bg-surface-1 text-ink hover:border-ink-muted"}`}
           >
             {t.label}
           </button>
@@ -72,43 +72,43 @@ export default function AskPage() {
             value={param}
             onChange={(e) => setParam(e.target.value)}
             placeholder={tpl.paramLabel}
-            className="w-80 rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm"
+            className="w-80 rounded-md border border-line-input bg-surface-1 px-3 py-2 text-sm"
           />
         )}
-        <button type="button" onClick={ask} disabled={busy} className="rounded-md bg-zinc-900 px-4 py-2 text-sm font-semibold text-white disabled:bg-zinc-400">
+        <button type="button" onClick={ask} disabled={busy} className="rounded-md bg-accent px-4 py-2 text-sm font-semibold text-accent-ink disabled:bg-line-input">
           {busy ? "Traversing…" : "Ask"}
         </button>
       </div>
 
-      {error && <p className="mt-3 rounded-md border border-red-300 bg-red-50 p-2 text-sm text-red-800">{error}</p>}
+      {error && <p className="mt-3 rounded-md border border-danger/40 bg-danger-container p-2 text-sm text-danger">{error}</p>}
 
       {result && (
-        <div className="mt-5 rounded-lg border border-zinc-200 bg-white p-4">
-          <h2 className="text-sm font-semibold text-zinc-800">{result.question}</h2>
+        <div className="mt-5 rounded-lg border border-line bg-surface-1 p-4">
+          <h2 className="text-sm font-semibold text-ink">{result.question}</h2>
           {result.empty ? (
-            <p className="mt-2 text-sm text-zinc-600">
+            <p className="mt-2 text-sm text-ink-muted">
               The firm has no recorded history here. A negative answer is an actual traversal over every record, not a guess.
             </p>
           ) : (
             <>
               <div className="mt-3 flex flex-wrap gap-1.5">
                 {result.nodes.map((n) => (
-                  <span key={n.id} className={`rounded-md border px-2 py-0.5 text-xs font-medium ${KIND_TONE[n.kind] ?? "border-zinc-300 bg-zinc-50"}`}>
+                  <span key={n.id} className={`rounded-md border px-2 py-0.5 text-xs font-medium ${KIND_TONE[n.kind] ?? "border-line-input bg-surface-sunken"}`}>
                     {n.label}
-                    <span className="ml-1 text-[9px] uppercase text-zinc-400">{n.kind}</span>
+                    <span className="ml-1 text-[9px] uppercase text-ink-muted/70">{n.kind}</span>
                   </span>
                 ))}
               </div>
-              <ul className="mt-3 space-y-1 border-t border-zinc-100 pt-2">
+              <ul className="mt-3 space-y-1 border-t border-line pt-2">
                 {result.edges.map((e, i) => (
-                  <li key={i} className="text-xs text-zinc-600">
-                    <span className="font-medium text-zinc-800">{e.from}</span> —{e.rel.toLowerCase().replace(/_/g, " ")}→{" "}
-                    <span className="font-medium text-zinc-800">{e.to}</span>
-                    {e.source && <span className="text-zinc-400"> · source: {e.source}</span>}
+                  <li key={i} className="text-xs text-ink-muted">
+                    <span className="font-medium text-ink">{e.from}</span> —{e.rel.toLowerCase().replace(/_/g, " ")}→{" "}
+                    <span className="font-medium text-ink">{e.to}</span>
+                    {e.source && <span className="text-ink-muted/70"> · source: {e.source}</span>}
                   </li>
                 ))}
               </ul>
-              <p className="mt-3 text-xs text-zinc-500">Cited matters: {result.citations.join("; ")}</p>
+              <p className="mt-3 text-xs text-ink-muted">Cited matters: {result.citations.join("; ")}</p>
             </>
           )}
         </div>

@@ -1,26 +1,126 @@
 @import "tailwindcss";
 
+/* Clearance — direction: warm legal paper, blue-black ink, blue-ink-signature accent.
+   Derived in UI-SPEC.md; conflict marks are data tones, separate from the accent. */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  color-scheme: light;
+  --canvas: #f7f4ee;
+  --surface-1: #fffdf9;
+  --surface-2: #efe9de;
+  --surface-sunken: #f1ede4;
+  --line: #d8d1c2;
+  --line-input: #8d8673;
+  --ink: #1b2237;
+  --ink-muted: #5a5f70;
+  --accent: #1c4fd1; /* blue-ink signature */
+  --accent-ink: #ffffff;
+  --accent-hover: oklch(from var(--accent) calc(l - 0.06) c h);
+  --accent-press: oklch(from var(--accent) calc(l - 0.12) c h);
+  --accent-container: color-mix(in oklch, var(--accent) 12%, var(--surface-1));
+  --focus: var(--ink);
+  --success: #1e6b43;
+  --warning: #7a5600;
+  --danger: #a81f17;
+  --danger-container: color-mix(in oklch, var(--danger) 9%, var(--surface-1));
+  /* data tones: conflict marks on the report (domain encodings, not UI alerts) */
+  --data-conflict: #a81f17; /* the CONFLICT stamp */
+  --data-caution: #8a5a00;
+  --data-wall: #3f4f9e; /* the screen/wall seal */
+  --r-sm: 2px;
+  --r-md: 4px;
+  --r-lg: 8px;
+  --shadow-raised: 0 1px 2px rgb(27 34 55 / 0.06), 0 2px 8px -2px rgb(27 34 55 / 0.08);
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --color-canvas: var(--canvas);
+  --color-surface-1: var(--surface-1);
+  --color-surface-2: var(--surface-2);
+  --color-surface-sunken: var(--surface-sunken);
+  --color-line: var(--line);
+  --color-line-input: var(--line-input);
+  --color-ink: var(--ink);
+  --color-ink-muted: var(--ink-muted);
+  --color-accent: var(--accent);
+  --color-accent-ink: var(--accent-ink);
+  --color-accent-container: var(--accent-container);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-danger: var(--danger);
+  --color-danger-container: var(--danger-container);
+  --color-conflict: var(--data-conflict);
+  --color-caution: var(--data-caution);
+  --color-wall: var(--data-wall);
+  --font-display: var(--ff-display);
+  --font-sans: var(--ff-body);
+  --font-mono: var(--ff-mono);
+  --radius-sm: var(--r-sm);
+  --radius-md: var(--r-md);
+  --radius-lg: var(--r-lg);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--canvas);
+  color: var(--ink);
+}
+
+h1,
+h2 {
+  text-wrap: balance;
+}
+p {
+  text-wrap: pretty;
+}
+
+.tnum {
+  font-variant-numeric: tabular-nums;
+}
+
+/* signature: conflict path connectors draw on in hop order */
+@media (prefers-reduced-motion: no-preference) {
+  .hop-draw {
+    stroke-dasharray: 72;
+    stroke-dashoffset: 72;
+    animation: hopdraw 300ms var(--ease-out) forwards;
+    animation-delay: var(--hop-delay, 0ms);
+  }
+  .hop-pill {
+    opacity: 0;
+    animation: hoppill 240ms var(--ease-out) forwards;
+    animation-delay: var(--hop-delay, 0ms);
+  }
+  .stamp-in {
+    animation: stamp 180ms var(--ease-out) both;
+  }
+}
+@keyframes hopdraw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+@keyframes hoppill {
+  from {
+    opacity: 0;
+    translate: 0 4px;
+  }
+  to {
+    opacity: 1;
+    translate: 0 0;
+  }
+}
+@keyframes stamp {
+  from {
+    scale: 1.15;
+    opacity: 0;
+  }
+  to {
+    scale: 1;
+    opacity: 1;
+  }
+}
+
+:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
 }

@@ -381,11 +381,18 @@
       "verify": [
         "npm run typecheck",
         "npm test",
-        "observe: foldcheck passes both sizes"
+        "observe: restyled screens render correctly at 1440 and 390 (screenshots reviewed); foldcheck on the seeded deploy runs in T11"
       ],
       "rollback": "git revert the T09 commits",
-      "status": "todo",
-      "notes": ""
+      "status": "done",
+      "notes": "Plan revision: foldcheck needs seeded data + deploy (A-1); moved to T11. Anti-slop grep clean; skeptical-evaluator gate self-reviewed (Sprint).",
+      "base": "792dce3",
+      "started_after": 29,
+      "evidence": [
+        "E0031",
+        "E0032",
+        "E0033"
+      ]
     },
     {
       "id": "T10",
