@@ -10,7 +10,9 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:int": "vitest run tests/int",
-    "seed": "tsx scripts/seed.ts"
+    "seed": "tsx scripts/seed.ts",
+    "eval": "tsx scripts/eval.ts",
+    "lint:graph": "node scripts/lint-graph.mjs"
   },
   "dependencies": {
     "falkordb": "^6.8.0",

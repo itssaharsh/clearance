@@ -320,8 +320,15 @@
         "npm test"
       ],
       "rollback": "git revert the T07 commit",
-      "status": "todo",
-      "notes": "AC-8 exact numbers come from corpus manifest; full eval needs live FalkorDB"
+      "status": "done",
+      "notes": "AC-8 exact numbers come from corpus manifest; full eval needs live FalkorDB",
+      "base": "377903a",
+      "started_after": 26,
+      "evidence": [
+        "E0027",
+        "E0028",
+        "E0029"
+      ]
     },
     {
       "id": "T08",

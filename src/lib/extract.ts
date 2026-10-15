@@ -1,4 +1,5 @@
 import { Party, PartyKind, PartyRole } from "./schemas";
+import { consumeLlmBudget, llmBudgetAvailable } from "./ratelimit";
 import { z } from "zod";
 
 /** Raised on any extractor failure (refusal, malformed output, timeout, quota). Callers fail closed: matter stays blocked. */
@@ -80,6 +81,7 @@ export class LLMExtractor implements Extractor {
   async extractParties(text: string): Promise<Party[]> {
     const key = process.env.ANTHROPIC_API_KEY;
     if (!key) throw new ExtractUnavailableError("no API key configured");
+    consumeLlmBudget();
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), 8_000);
     try {
@@ -119,6 +121,7 @@ export class LLMExtractor implements Extractor {
 export function selectExtractor(): Extractor {
   const pref = process.env.EXTRACTOR;
   if (pref === "mock") return new MockExtractor();
-  if (pref === "llm") return new LLMExtractor();
-  return process.env.ANTHROPIC_API_KEY ? new LLMExtractor() : new MockExtractor();
+  // credit-safe: beyond the daily live budget, extraction falls back to the deterministic mock
+  if (pref === "llm") return llmBudgetAvailable() ? new LLMExtractor() : new MockExtractor();
+  return process.env.ANTHROPIC_API_KEY && llmBudgetAvailable() ? new LLMExtractor() : new MockExtractor();
 }
