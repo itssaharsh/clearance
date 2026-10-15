@@ -1,0 +1,84 @@
+{
+  "rules": [
+    {
+      "id": "repo-public",
+      "quote": "A public source-code repository",
+      "source": "https://www.wemakedevs.org/hackathons/falkordb/rules Rule 10",
+      "dq": false,
+      "kind": "attest",
+      "added": "2026-10-15T19:00:19Z"
+    },
+    {
+      "id": "readme-model",
+      "quote": "A README with setup instructions and your graph data model",
+      "source": "Rule 10",
+      "dq": false,
+      "kind": "section",
+      "added": "2026-10-15T19:00:19Z",
+      "file": "README.md",
+      "heading": "The graph data model",
+      "number": false
+    },
+    {
+      "id": "readme-cypher",
+      "quote": "The Cypher queries or graph algorithms the product depends on",
+      "source": "Rule 10",
+      "dq": false,
+      "kind": "section",
+      "added": "2026-10-15T19:00:20Z",
+      "file": "README.md",
+      "heading": "The Cypher the product depends on",
+      "number": false
+    },
+    {
+      "id": "demo-video",
+      "quote": "A demo video showing the working project",
+      "source": "Rule 10",
+      "dq": true,
+      "kind": "attest",
+      "added": "2026-10-15T19:00:20Z"
+    },
+    {
+      "id": "live-deploy",
+      "quote": "A live deployment, or complete local setup instructions if it cannot be deployed",
+      "source": "Rule 10",
+      "dq": false,
+      "kind": "attest",
+      "added": "2026-10-15T19:00:20Z",
+      "confirmed": {
+        "evidence": "https://clearance-chi.vercel.app opens signed out with the seeded queue; verified by curl (200, /api/health graph up + seeded) and chromium screenshots at 1440x900 and 390x844 on 2026-10-15 (ledger E0052); README links it in the first screen",
+        "at": "2026-10-15T19:01:47Z"
+      }
+    },
+    {
+      "id": "track-named",
+      "quote": "The track you are entering",
+      "source": "Rule 10 / Rule 5: name every track you are entering when you submit",
+      "dq": false,
+      "kind": "attest",
+      "added": "2026-10-15T19:00:21Z"
+    },
+    {
+      "id": "falkordb-primary",
+      "quote": "FalkorDB must be the primary graph database in your project, and it must support a central part of what the product does",
+      "source": "Rule 2",
+      "dq": true,
+      "kind": "section",
+      "added": "2026-10-15T19:00:21Z",
+      "file": "README.md",
+      "heading": "The Cypher the product depends on",
+      "number": false
+    },
+    {
+      "id": "ai-disclosure",
+      "quote": "AI coding assistants are allowed, but their use must be disclosed",
+      "source": "Rule 11",
+      "dq": false,
+      "kind": "section",
+      "added": "2026-10-15T19:00:21Z",
+      "file": "README.md",
+      "heading": "AI-tool disclosure (Rule 11)",
+      "number": false
+    }
+  ]
+}
