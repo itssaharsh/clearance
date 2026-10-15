@@ -82,6 +82,14 @@ export async function writeQuery<T = Record<string, unknown>>(cypher: string, pa
   }
 }
 
+/** Close the client connection (CLI scripts must call this, or the open socket holds the process). */
+export async function closeGraph(): Promise<void> {
+  if (!clientPromise) return;
+  const db = await clientPromise.catch(() => null);
+  clientPromise = null;
+  if (db) await db.close().catch(() => undefined);
+}
+
 export async function graphUp(): Promise<boolean> {
   try {
     await roQuery("MATCH (n) RETURN count(n) AS c");

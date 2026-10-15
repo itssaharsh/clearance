@@ -62,7 +62,13 @@ async function main() {
   console.log("\nPASS: every planted conflict found by traversal; zero false clears.");
 }
 
-main().catch((e) => {
-  console.error(`eval failed: ${e.message}`);
-  process.exit(1);
-});
+main()
+  .then(async () => {
+    const { closeGraph } = await import("../src/lib/graph");
+    await closeGraph();
+    process.exit(0);
+  })
+  .catch((e) => {
+    console.error(`eval failed: ${e.message}`);
+    process.exit(1);
+  });
