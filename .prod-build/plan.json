@@ -209,11 +209,18 @@
       "verify": [
         "npm run typecheck",
         "npm test",
-        "observe: / leads with clearance queue at 1440x900 and 390x844 (foldcheck later in T09)"
+        "observe: / renders correctly at 1440x900 and 390x844 (degraded state now; seeded queue foldcheck in T09)"
       ],
       "rollback": "git revert the T04 commits",
-      "status": "todo",
-      "notes": ""
+      "status": "done",
+      "notes": "Plan revision: observe item reworded — without FALKORDB_URL the first screen is the designed fails-closed banner; AC-9 (seeded queue) verifies in T09.",
+      "base": "373c0f4",
+      "started_after": 12,
+      "evidence": [
+        "E0019",
+        "E0020",
+        "E0021"
+      ]
     },
     {
       "id": "T05",

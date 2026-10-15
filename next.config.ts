@@ -1,9 +1,10 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
-  cacheComponents: true,
-  partialPrefetching: true,
+  // Fully dynamic app (live graph state): Cache Components off on purpose.
+  // falkordb (and its redis client) break under bundling ("a.BigInt is not a function"):
+  // keep them external and loaded from node_modules at runtime.
+  serverExternalPackages: ["falkordb", "redis", "@redis/client"],
   turbopack: {
     rules: {
       "*.css": {
