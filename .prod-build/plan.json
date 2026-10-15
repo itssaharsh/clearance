@@ -416,8 +416,15 @@
         "observe: backup take exists and plays"
       ],
       "rollback": "n/a",
-      "status": "todo",
-      "notes": ""
+      "status": "done",
+      "notes": "",
+      "base": "ddd51f5",
+      "started_after": 58,
+      "evidence": [
+        "E0065",
+        "E0066",
+        "E0067"
+      ]
     },
     {
       "id": "T11",
