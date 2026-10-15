@@ -166,8 +166,16 @@
         "npm test"
       ],
       "rollback": "git revert the T03 commits",
-      "status": "todo",
-      "notes": "AC-1/AC-2 full verification needs live FalkorDB (A-1); unit layer proves logic, int tests run when env arrives"
+      "status": "done",
+      "notes": "AC-1/AC-2 full verification needs live FalkorDB (A-1); unit layer proves logic, int tests run when env arrives",
+      "base": "0e57609",
+      "started_after": 6,
+      "evidence": [
+        "E0009",
+        "E0010",
+        "E0011",
+        "E0012"
+      ]
     },
     {
       "id": "T04",
