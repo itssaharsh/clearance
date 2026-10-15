@@ -1,33 +1,66 @@
-node_modules/
-.env
-.env.*
+
 !.env.example
-.prod-build/logs/
-dist/
-.next/
-__pycache__/
-.venv/
-coverage/
-.claude/worktrees/
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+# browser session files hold live sign-in cookies
+# debug
+# dependencies
+# env files (can opt-in for committing if needed)
+# misc
+# next.js
 # prod-build: planning notes stay out of a judged repository
+# production
+# testing
+# typescript
+# vercel
+*.pem
+*.storage-state.json
+*.tsbuildinfo
+.DS_Store
+.claude/worktrees/
+.env
+.env*
+.env.*
+.next/
+.pnp.*
+.pnpm-debug.log*
+.prod-build/logs/
+.venv/
+.vercel
+.yarn/*
+/.next/
+/.pnp
+/build
+/coverage
+/node_modules
+/out/
+DEMO-SCRIPT.md
+PITCH-NOTES.md
+PITCH.md
+SCRIPT.md
+SHOOT.md
+SUBMISSION.md
+VIDEO-SCRIPT.md
+__pycache__/
+coverage/
+dist/
 hackathon-idea/
-prod-idea/
-notes/hackathon-idea/
-judging-intel*.md
-judging-notes*.md
-judge-notes*.md
 idea-package*.md
 idea_package*.md
-SUBMISSION.md
-submission.md
-SHOOT.md
-SCRIPT.md
-PITCH.md
-PITCH-NOTES.md
-DEMO-SCRIPT.md
-VIDEO-SCRIPT.md
-video-script.md
-# browser session files hold live sign-in cookies
+judge-notes*.md
+judging-intel*.md
+judging-notes*.md
+next-env.d.ts
+node_modules/
+notes/hackathon-idea/
+npm-debug.log*
+prod-idea/
 storage-state*.json
 storage_state*.json
-*.storage-state.json
+submission.md
+video-script.md
+yarn-debug.log*
+yarn-error.log*
