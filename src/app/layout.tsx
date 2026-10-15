@@ -21,6 +21,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <nav className="flex gap-4 text-sm font-medium text-zinc-600">
               <Link className="hover:text-zinc-900" href="/">Queue</Link>
               <Link className="hover:text-zinc-900" href="/intake">New intake</Link>
+              <Link className="hover:text-zinc-900" href="/ask">Ask the firm</Link>
             </nav>
           </div>
         </header>
