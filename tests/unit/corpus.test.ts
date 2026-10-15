@@ -25,9 +25,9 @@ describe("corpus generator", () => {
     }
   });
 
-  it("manifest: 12 expected paths, baseline finds 4 (AC-8 ground truth)", () => {
-    expect(PLANTED_MANIFEST.totalExpectedPaths).toBe(12);
-    expect(PLANTED_MANIFEST.baselineTotal).toBe(4);
+  it("manifest: 10 expected paths, name search finds 6 (AC-8 ground truth, corrected after review B2)", () => {
+    expect(PLANTED_MANIFEST.totalExpectedPaths).toBe(10);
+    expect(PLANTED_MANIFEST.baselineTotal).toBe(6);
   });
 
   it("hero intake stays baseline-invisible: 'Meridian Build' appears in no matter title or filler name", () => {

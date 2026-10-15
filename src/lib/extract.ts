@@ -13,8 +13,6 @@ export class ExtractUnavailableError extends Error {
 export interface Extractor {
   readonly mode: "llm" | "mock";
   extractParties(text: string): Promise<Party[]>;
-  /** Deterministic name embedding for entity resolution. */
-  embed(name: string): Promise<number[]>;
 }
 
 // ---------------------------------------------------------------- Mock ----
@@ -23,7 +21,7 @@ export interface Extractor {
 const ORG_HINTS = /\b(llc|inc|ltd|corp|co|group|logistics|holdings|partners|build|builders|law|labs|systems)\b\.?$/i;
 
 function properNounRuns(text: string): string[] {
-  const runs = text.match(/\b([A-Z][\w&.']*(?:\s+(?:[A-Z][\w&.']*|of|and|the|[A-Z]\.))*)/g) ?? [];
+  const runs = text.match(/\b([A-Z][\w&.']*(?:\s+(?:[A-Z][\w&.']*|of|and|the|&))*)/g) ?? [];
   return runs.map((r) => r.trim()).filter((r) => r.length > 2 && r.split(/\s+/).length <= 5);
 }
 
@@ -34,7 +32,7 @@ export class MockExtractor implements Extractor {
     const parties = new Map<string, Party>();
     const add = (name: string, role: z.infer<typeof PartyRole>) => {
       const clean = name.replace(/[.,;:]$/, "").trim();
-      if (!clean || /^(The|Our|We|They|Monday|Tuesday|Wednesday|Thursday|Friday)$/i.test(clean)) return;
+      if (!clean || /^(The|Our|We|They|New|Prospective|Primary|Contact|Inquiry|Dear|Mr|Ms|Monday|Tuesday|Wednesday|Thursday|Friday)$/i.test(clean)) return;
       const kind: z.infer<typeof PartyKind> = ORG_HINTS.test(clean) || /\b(LLC|Inc|Ltd|Corp|Group)\b/.test(clean) ? "org" : clean.split(/\s+/).length >= 2 ? "person" : "org";
       if (!parties.has(clean.toLowerCase())) parties.set(clean.toLowerCase(), Party.parse({ name: clean, kind, role }));
     };
@@ -55,17 +53,6 @@ export class MockExtractor implements Extractor {
     return out;
   }
 
-  async embed(name: string): Promise<number[]> {
-    // 16-dim deterministic hash embedding of normalized character bigrams.
-    const s = ` ${name.toLowerCase().replace(/[^a-z0-9 ]/g, "")} `;
-    const v = new Array(16).fill(0);
-    for (let i = 0; i < s.length - 1; i++) {
-      const code = s.charCodeAt(i) * 31 + s.charCodeAt(i + 1);
-      v[code % 16] += 1;
-    }
-    const norm = Math.sqrt(v.reduce((a, b) => a + b * b, 0)) || 1;
-    return v.map((x) => x / norm);
-  }
 }
 
 // ----------------------------------------------------------------- LLM ----
@@ -76,7 +63,6 @@ const LLMParties = z.object({
 
 export class LLMExtractor implements Extractor {
   readonly mode = "llm" as const;
-  private fallback = new MockExtractor();
 
   async extractParties(text: string): Promise<Party[]> {
     const key = process.env.ANTHROPIC_API_KEY;
@@ -112,10 +98,6 @@ export class LLMExtractor implements Extractor {
     }
   }
 
-  async embed(name: string): Promise<number[]> {
-    // Embeddings stay deterministic (hash) in both modes: resolution must be replayable.
-    return this.fallback.embed(name);
-  }
 }
 
 export function selectExtractor(): Extractor {

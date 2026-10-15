@@ -79,6 +79,7 @@ export const MatterReport = z.object({
   baseline: z.array(BaselineResult),
   uncertain: z.array(ResolvedParty), // subset needing review; non-empty => blocked
   blockedReason: z.string().nullable(),
+  persisted: z.boolean().default(true), // false when the report could not be stored (graph down): the UI must not navigate to it
 });
 export type MatterReport = z.infer<typeof MatterReport>;
 
@@ -94,6 +95,8 @@ export const DecisionRequest = z.object({
   note: z.string().max(500).optional(),
   // resolve an uncertain match while deciding: name -> canonical node id (writes ALIAS_OF)
   resolveAliases: z.record(z.string(), z.string()).optional(),
+  // names the attorney declares to be genuinely new entities (writes a node; never asked again)
+  markNew: z.array(z.string()).optional(),
   screened: z.array(z.string()).optional(), // attorney names for a wall
 });
 export type DecisionRequest = z.infer<typeof DecisionRequest>;

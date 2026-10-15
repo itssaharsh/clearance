@@ -9,7 +9,7 @@ An office manager or managing attorney at a small law firm, at new-client intake
 
 ## Scope
 
-- **MUST:** synthetic firm corpus (seeded, deterministic, planted conflicts) · intake paste → LLM party extraction → entity resolution (vector + alias, fails closed) · k≤3 path engine over typed relationship edges (deterministic Cypher) · clearance report with drawn paths + name-search baseline panel · gate (blocked / cleared / walled states) + attorney sign-off write-back · Ask-the-firm panel (3–5 canned cited subgraph queries) · ethical-wall proposer (screened list from WORKED_ON; wall nodes respected by next check) · ask-once alias memory · eval script (one command, graph vs baseline table) · live deploy, signed-out, seeded, demo-reset · README first screen (schema + 5 annotated queries, compliance + AI disclosure).
+- **MUST:** synthetic firm corpus (seeded, deterministic, planted conflicts) · intake paste → LLM party extraction → deterministic entity resolution (exact / surname+initials / word-containment, fails closed, alias memory) · k≤3 path engine over typed relationship edges (deterministic Cypher) · clearance report with drawn paths + name-search baseline panel · gate (blocked / cleared / walled states) + attorney sign-off write-back · Ask-the-firm panel (3–5 canned cited subgraph queries) · ethical-wall proposer (screened list from WORKED_ON; wall nodes respected by next check) · ask-once alias memory · eval script (one command, graph vs baseline table) · live deploy, signed-out, seeded, demo-reset · README first screen (schema + 5 annotated queries, compliance + AI disclosure).
 - **SHOULD:** decisions-as-precedent citations (day-3 stretch; if built → add Track 02 at submission) · FalkorDB Browser view in demo.
 - **COULD (listed, not built):** lateral-hire bulk sweep · walls UI beyond proposer · multi-firm switcher.
 - **WON'T now:** PMS integrations, auth, payments, engagement-letter drafting, free-form text-to-Cypher, real firm data.
@@ -43,7 +43,7 @@ An office manager or managing attorney at a small law firm, at new-client intake
 
 | Entity/Edge | Key fields | Notes |
 |---|---|---|
-| Person, Org | name, kind; vector embedding on name+context | synthetic, no PII |
+| Person, Org | name, kind | synthetic, no PII |
 | Matter | title, status(blocked/cleared/walled/declined), created | source of truth for gate state |
 | Edges: ALIAS_OF, SUBSIDIARY_OF, RELATED_TO(type), CLIENT_IN, ADVERSE_IN, WITNESS_IN, DECLINED_CONSULT, WORKED_ON, SCREENED_BY | every edge: `source` (record that established it), `since` | provenance mandatory |
 | Clearance | by, at, paths_seen(json) | write-once |
@@ -59,7 +59,6 @@ Seeded corpus: ~40 matters, planted: one 2-hop subsidiary conflict, one declined
 | UI ↔ API | `src/lib/schemas.ts` (zod) | 4xx/5xx | typed error states above |
 | API ↔ FalkorDB | `src/lib/graph.ts`; reads via `ro_query`, timeout 3s, LIMIT caps | down/timeout | fails closed: blocked + banner; health endpoint reports |
 | API ↔ LLM (extraction + resolution assist) | `src/lib/extract.ts` port: `LLMExtractor` (Anthropic) / `MockExtractor` (deterministic, demo-safe) | refusal, malformed JSON, timeout, quota | fails closed: matter blocked "extraction unavailable"; mock mode via `EXTRACTOR=mock` |
-| Embeddings for vector index | same port; mock = hash-based stub | same | alias-edge logic still works; vector optional in mock |
 
 ## Constraints
 
@@ -71,16 +70,16 @@ Seeded corpus: ~40 matters, planted: one 2-hop subsidiary conflict, one declined
 
 ## Acceptance criteria
 
-- AC-1 WHEN a seeded intake naming a party two hops from a current client is submitted THE SYSTEM SHALL draw that path and set the matter blocked. Verify: `npm run test:e2e -- intake` (P0)
-- AC-2 WHEN the same intake runs THE SYSTEM SHALL show the name-search baseline (0 hits) beside the graph paths. Verify: e2e intake (P0)
+- AC-1 WHEN a seeded intake naming a party two hops from a current client is submitted THE SYSTEM SHALL draw that path and set the matter blocked. Verify: `npm run test:int` (engine) (P0)
+- AC-2 WHEN the hero intake runs THE SYSTEM SHALL show the name-search baseline beside the graph paths, with zero hits for the subsidiary party (Meridian Build). Verify: `npm run test:int` (engine) (P0) [revised: Kane's own declined consult IS name-searchable; the subsidiary path is the miss]
 - AC-3 IF resolution confidence < threshold THEN THE SYSTEM SHALL file the match uncertain and keep the matter blocked. Verify: unit `resolution.test` (RED first) (P0)
 - AC-4 IF the extractor fails/times out THEN THE SYSTEM SHALL keep the matter blocked with "extraction unavailable" and offer retry. Verify: unit + e2e failure path (P0)
 - AC-5 WHEN an attorney signs THE SYSTEM SHALL write a Clearance node (who/when/paths_seen) and update the queue. Verify: integration `signoff.test` (P0)
 - AC-6 WHEN a wall is approved THE SYSTEM SHALL write Wall + SCREENED_BY and a subsequent intake check SHALL respect it. Verify: integration `wall.test` (P1)
 - AC-7 WHEN an uncertain match is resolved once THE SYSTEM SHALL write ALIAS_OF and never re-ask for that pair. Verify: integration `alias.test` (P1)
-- AC-8 WHEN `npm run eval` runs on the seeded corpus THE SYSTEM SHALL print planted-conflict recall: graph 12/12 vs baseline ≤4/12 (exact numbers from the generator). Verify: `pb.py run -- npm run eval` (P0)
+- AC-8 WHEN `npm run eval` runs on the seeded corpus THE SYSTEM SHALL print planted-conflict recall: graph 10/10 vs name-search 6/10, the four misses being the relationship-only conflicts (subsidiary, alias, family, officer). Verify: `pb.py run -- npm run eval` (P0) [revised: ground truth corrected after fresh review, report T11-review.md B2]
 - AC-9 WHEN `/` opens with no input THE SYSTEM SHALL lead with the clearance queue (blocked matters with drawn paths) at 1440×900 and 390×844. Verify: browser + foldcheck (P0)
-- AC-10 WHEN an Ask-the-firm question runs THE SYSTEM SHALL return a drawn subgraph whose every claim cites a matter. Verify: e2e `ask` (P1)
+- AC-10 WHEN an Ask-the-firm question runs THE SYSTEM SHALL return a drawn subgraph whose every claim cites a matter. Verify: `npm run test:int` (ask) (P1)
 - AC-11 All graph reads go through `ro_query` with a 3 s timeout and LIMIT. Verify: grep gate in `npm run lint:graph` (P1)
 - AC-12 WHEN `/api/admin/reset` runs THE SYSTEM SHALL restore the exact seeded corpus (3 consecutive reset+eval runs identical). Verify: scripted check (P1)
 
@@ -94,7 +93,7 @@ Seeded corpus: ~40 matters, planted: one 2-hop subsidiary conflict, one declined
 
 ## Demo script (3 min, organiser's split)
 
-0:00–0:20 problem: insurer stat + "small firms check with a spreadsheet". 0:20–1:50 flow: paste intake → extraction steps → two paths light (subsidiary 2-hop + declined consult) beside name-search 0 hits → matter blocked → attorney signs wall for the waivable path → Ask-the-firm question answered with citations → later intake respects the wall. 1:50–2:20 architecture: FalkorDB Browser on the firm graph; named aloud: multi-graph, vector index, variable-length Cypher, ro_query, write-back; Rule 3 beat: baseline panel = "the product with FalkorDB removed". 2:20–2:50 staged failure: "R. Kane" ambiguous → files uncertain, stays blocked. 2:50–3:00 limits + next.
+0:00–0:20 problem: insurer stat + "small firms check with a spreadsheet". 0:20–1:50 flow: paste intake → extraction steps → two paths light (subsidiary 2-hop + declined consult); the name-search panel beside them finds Kane's old consult but shows zero hits for Meridian Build — the subsidiary path is invisible to string search → matter blocked → attorney signs wall for the waivable path → Ask-the-firm question answered with citations → later intake respects the wall. 1:50–2:20 architecture: FalkorDB Browser on the firm graph; named aloud: multi-graph (one graph per firm), variable-length Cypher, ro_query with timeouts, UNWIND…MERGE loads, write-back of decisions; Rule 3 beat: baseline panel = "the product with FalkorDB removed". 2:20–2:50 staged failure: "R. Kane" ambiguous → files uncertain, stays blocked. 2:50–3:00 limits + next.
 
 ## §12 Event and judged path
 

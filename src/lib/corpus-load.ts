@@ -1,11 +1,7 @@
 import { writeQuery, roQuery } from "./graph";
 import { buildCorpus } from "./corpus-spec";
-import { MockExtractor } from "./extract";
 
-// Idempotent loader: UNWIND ... MERGE batches keyed on `key`, plus deterministic
-// name embeddings for entity resolution. Reset = wipe + load (AC-12).
-
-const embedder = new MockExtractor();
+// Idempotent loader: UNWIND ... MERGE batches keyed on `key`. Reset = wipe + load (AC-12).
 
 export async function wipeGraph(): Promise<void> {
   await writeQuery("MATCH (n) DETACH DELETE n");
@@ -17,7 +13,7 @@ export async function loadCorpus(): Promise<{ nodes: number; edges: number }> {
   const byLabel: Record<string, Array<Record<string, unknown>>> = {};
   for (const n of nodes) {
     const name = "name" in n ? n.name : n.title;
-    const row: Record<string, unknown> = { key: n.key, name, embedding: await embedder.embed(name) };
+    const row: Record<string, unknown> = { key: n.key, name };
     if (n.label === "Matter") Object.assign(row, { year: n.year, mstatus: n.status });
     (byLabel[n.label] ??= []).push(row);
   }
@@ -25,7 +21,7 @@ export async function loadCorpus(): Promise<{ nodes: number; edges: number }> {
   for (const [label, rows] of Object.entries(byLabel)) {
     const extra = label === "Matter" ? ", n.year = row.year, n.mstatus = row.mstatus, n.state = 'closed'" : "";
     await writeQuery(
-      `UNWIND $rows AS row MERGE (n:${label} {key: row.key}) SET n.name = row.name, n.embedding = row.embedding${extra}`,
+      `UNWIND $rows AS row MERGE (n:${label} {key: row.key}) SET n.name = row.name${extra}`,
       { rows: rows as never },
     );
   }

@@ -38,6 +38,10 @@ export default function IntakePage() {
         setError(body.error === "invalid intake" ? `Invalid intake: ${(body.issues ?? []).join("; ")}` : (body.error ?? "request failed"));
         return; // the pasted text is kept (retry state)
       }
+      if (body.persisted === false) {
+        setError(body.blockedReason ?? "The check could not run — nothing was stored. Retry.");
+        return;
+      }
       router.push(`/matter/${body.id}`);
     } catch {
       setError("Request failed. Your text is kept — retry.");

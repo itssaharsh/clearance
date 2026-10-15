@@ -92,7 +92,7 @@ export const EVAL_INTAKES: EvalIntake[] = [
       { kind: "corporate_family", via: "Meridian Build -> SUBSIDIARY_OF -> Meridian Group -> CLIENT_IN -> M-012" },
       { kind: "declined_consult", via: "Kane Logistics LLC -> DECLINED_CONSULT -> M-031" },
     ],
-    baselineFinds: 0,
+    baselineFinds: 1, // Kane's own declined-consult record IS name-searchable; the subsidiary path is not
   },
   {
     id: "e2",
@@ -127,10 +127,9 @@ export const EVAL_INTAKES: EvalIntake[] = [
     title: "Kane under officer's name",
     text: "A new client asks us to pursue Robert T. Kane personally over unpaid invoices.",
     expectPaths: [
-      { kind: "related_person", via: "Robert T. Kane -> RELATED_TO(officer) -> Kane Logistics LLC -> DECLINED_CONSULT -> M-031" },
-      { kind: "declined_consult", via: "officer link to declined consult" },
+      { kind: "declined_consult", via: "Robert T. Kane -> RELATED_TO(officer) -> Kane Logistics LLC -> DECLINED_CONSULT -> M-031 (one physical path; terminal kind wins)" },
     ],
-    baselineFinds: 1,
+    baselineFinds: 0, // Robert T. Kane himself has no matter-attached record
   },
   {
     id: "e7",
@@ -146,15 +145,14 @@ export const EVAL_INTAKES: EvalIntake[] = [
     expectPaths: [
       { kind: "direct_adversity", via: "Northgate Partners -> ADVERSE_IN -> M-008" },
       { kind: "direct_adversity", via: "Hartwell Property Trust -> CLIENT_IN -> M-008" },
-      { kind: "corporate_family", via: "alias Northgate & Co history" },
     ],
-    baselineFinds: 0,
+    baselineFinds: 2, // both names are matter-attached and name-searchable
   },
 ];
 
 export const PLANTED_MANIFEST = {
-  totalExpectedPaths: EVAL_INTAKES.reduce((a, i) => a + i.expectPaths.length, 0), // 12
-  baselineTotal: EVAL_INTAKES.reduce((a, i) => a + i.baselineFinds, 0), // 4
+  totalExpectedPaths: EVAL_INTAKES.reduce((a, i) => a + i.expectPaths.length, 0), // 10
+  baselineTotal: EVAL_INTAKES.reduce((a, i) => a + i.baselineFinds, 0), // 6
 };
 
 // ------------------------------------------------- procedural filler -------

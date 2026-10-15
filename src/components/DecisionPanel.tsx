@@ -27,9 +27,11 @@ export function DecisionPanel({ report, proposal }: { report: MatterReport; prop
     setError(null);
     try {
       const resolveAliases: Record<string, string> = {};
+      const markNew: string[] = [];
       for (const u of report.uncertain) {
         const choice = aliasChoice[u.party.name];
-        if (choice && choice !== "__new__") resolveAliases[u.party.name] = choice;
+        if (choice === "__new__") markNew.push(u.party.name);
+        else if (choice) resolveAliases[u.party.name] = choice;
       }
       const res = await fetch(`/api/matters/${report.id}/decision`, {
         method: "POST",
@@ -38,6 +40,7 @@ export function DecisionPanel({ report, proposal }: { report: MatterReport; prop
           action,
           by,
           resolveAliases: Object.keys(resolveAliases).length > 0 ? resolveAliases : undefined,
+          markNew: markNew.length > 0 ? markNew : undefined,
           screened: action === "wall" ? screened : undefined,
         }),
       });

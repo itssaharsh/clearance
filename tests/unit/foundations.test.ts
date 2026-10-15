@@ -29,13 +29,6 @@ describe("MockExtractor", () => {
     for (const p of parties) Party.parse(p);
   });
 
-  it("embeds deterministically with unit norm", async () => {
-    const v1 = await ex.embed("Robert T. Kane");
-    const v2 = await ex.embed("Robert T. Kane");
-    expect(v1).toEqual(v2);
-    const norm = Math.sqrt(v1.reduce((a, b) => a + b * b, 0));
-    expect(norm).toBeCloseTo(1, 5);
-  });
 
   it("fails closed on text with no parties", async () => {
     await expect(ex.extractParties("....")).rejects.toThrow(/extraction unavailable/);

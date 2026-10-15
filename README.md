@@ -1,36 +1,91 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Clearance
 
-## Getting Started
+**Name search finds "Kane Logistics". Clearance finds the subsidiary suing your client two hops away — and won't open the matter until a lawyer signs the path it drew.**
 
-First, run the development server:
+Conflicts of interest are the leading cause of legal-malpractice claims, and most small firms still check them with a shared spreadsheet and memory. Clearance is a conflicts-of-interest gate: the firm's history lives in a FalkorDB graph, a new inquiry is checked by deterministic multi-hop traversal, and the matter stays blocked until an attorney signs the drawn risk. The signature, the wall and every resolved identity are written back — the graph is the firm's record.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+Built for **Graph Hacks: Context for AI Agents** (WeMakeDevs × FalkorDB, Oct 15–18 2026) — Tracks: **Agents That Act on Connected Data** and **Company Brain**. This repository was created on 15 Oct 2026, inside the event window; no project code predates the start (first commit `c4138e4`). Idea notes and graph-model sketches (allowed before the start by Rule 8) live outside this repository.
+
+## The graph data model (Rule 10)
+
+One FalkorDB graph per firm (`firm_demo` in the demo — multi-graph tenancy is the isolation story).
+
+```
+(:Person|:Org {key, name})          people and organisations, incl. attorney-confirmed alias nodes
+(:Attorney {key, name})             the firm's lawyers
+(:Matter {key, name, year})         the firm's historical matters
+(:Intake {key, title, status, report})   new inquiries and their full reports (the gate's record)
+(:Clearance {key, by, at, action, pathsSeen})   a signed decision — write-once
+(:Wall {key, by, at})               an approved ethical wall
+
+(a)-[:ALIAS_OF {source, since}]->(b)        renames + attorney resolutions (ask-once memory)
+(a)-[:SUBSIDIARY_OF {source, since}]->(b)   corporate family
+(a)-[:RELATED_TO {relType: family|officer, source, since}]->(b)
+(e)-[:CLIENT_IN|ADVERSE_IN|WITNESS_IN|DECLINED_CONSULT {source, since}]->(:Matter)
+(:Attorney)-[:WORKED_ON {source, since}]->(:Matter)
+(:Wall)-[:GUARDS]->(:Intake)  (:Wall)-[:SCREENED_BY]->(:Attorney)  (:Wall)-[:AROUND]->(:Matter)
+(:Clearance)-[:CLEARS]->(:Intake)
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+**Every edge carries provenance** (`source`: the record that established it; `since`). A conflict verdict is a path, and every hop of it can say where it came from.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## The Cypher the product depends on (Rule 10)
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+1. **Direct conflicts** — a party's own matter history:
+```cypher
+MATCH p = (a {key: $key})-[t:CLIENT_IN|ADVERSE_IN|WITNESS_IN|DECLINED_CONSULT]->(m:Matter)
+RETURN p, type(t) LIMIT 50
+```
+2. **Indirect conflicts (the wedge)** — variable-length traversal through aliases, corporate families and personal relationships to the firm's history; this is the path a name search cannot see:
+```cypher
+MATCH p = (a {key: $key})-[:ALIAS_OF|SUBSIDIARY_OF|RELATED_TO*1..2]-(b)-[t:CLIENT_IN|ADVERSE_IN|DECLINED_CONSULT]->(m:Matter)
+WHERE id(a) <> id(b)
+RETURN p, type(t) LIMIT 50
+```
+3. **Wall enforcement** — a standing ethical wall downgrades later findings on the same matter:
+```cypher
+MATCH (w:Wall)-[:AROUND]->(m:Matter {name: $m})
+OPTIONAL MATCH (w)-[:SCREENED_BY]->(a:Attorney)
+RETURN w.by, w.at, collect(a.name) LIMIT 5
+```
+4. **The baseline shown beside it** — the incumbent, a literal name search (deliberately weak; this is the product with FalkorDB taken out, Rule 3):
+```cypher
+MATCH (e)-[:CLIENT_IN|ADVERSE_IN|WITNESS_IN|DECLINED_CONSULT]->(m:Matter)
+WHERE toLower(e.name) CONTAINS toLower($q) RETURN DISTINCT e.name LIMIT 25
+```
+5. **Ask the firm** (institutional memory as parameterised templates — e.g. "who has ever touched a Meridian entity?"):
+```cypher
+MATCH (o) WHERE toLower(o.name) CONTAINS toLower($param)
+MATCH (o)-[:ALIAS_OF|SUBSIDIARY_OF*0..2]-(fam)
+MATCH (fam)-[t:CLIENT_IN|ADVERSE_IN|DECLINED_CONSULT|WITNESS_IN]->(m:Matter)
+OPTIONAL MATCH (att:Attorney)-[:WORKED_ON]->(m)
+RETURN fam.name, type(t), t.source, m.name, att.name LIMIT 30
+```
+All reads run through `GRAPH.RO_QUERY` with a 3-second timeout and a bounded-result guard (`npm run lint:graph` enforces that no query bypasses the graph layer).
 
-## Learn More
+## Where the model is — and where it is not
 
-To learn more about Next.js, take a look at the following resources:
+The LLM does exactly one job: reading the parties out of a messy intake note (`src/lib/extract.ts`; a deterministic mock ships for demo-safe, key-free operation — `/api/health` reports which is live). Everything that decides is model-free and replayable: entity resolution is three auditable rules (an exact normalized name auto-matches; a shared surname with matching initials, or an org name whose every word appears in a record's name, asks the attorney once and is remembered as an `ALIAS_OF` edge; everything else is new), and the verdict is the traversal above. The model cannot talk the gate open: uncertain identity blocks, a graph outage blocks, and only a signature clears.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Run it
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```bash
+npm install
+export FALKORDB_URL=falkor://:<password>@<host>:<port>   # FalkorDB Cloud free tier, or local Docker
+npm run seed        # deterministic synthetic firm: ~120 entities, ~40 matters, planted conflicts
+npm run dev         # http://localhost:3000
+npm run eval        # planted-conflict recall: graph vs name search, one command
+npm test            # unit suite;  npm run test:int needs FALKORDB_URL
+```
+Optional: `ANTHROPIC_API_KEY` for live extraction (`EXTRACTOR=mock` forces the deterministic mock; live calls are capped per day), `RESET_TOKEN` to enable `POST /api/admin/reset`.
 
-## Deploy on Vercel
+## Honest limits
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- The demo firm is **synthetic** (Rule 6 bars real client data; law-firm records are confidential by nature). The corpus generator is deterministic and the planted-conflict manifest is public in `src/lib/corpus-spec.ts` — the eval is reproducible, not curated.
+- The name-search baseline legitimately finds direct records (6 of 10 planted conflicts); what it can never see are the indirect ones — subsidiary, alias, family, officer — which is exactly the malpractice gap.
+- Rate limits are in-memory per instance (fine for a demo; a real deployment would move them to the graph).
+- No auth by design: judges must not sign in. A real firm deployment would add it.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## AI-tool disclosure (Rule 11)
+
+Built with Claude Code (planning, code, tests, review); all graph modelling, queries and architecture decisions are documented in `ARCHITECTURE.md` and explained in the demo. The authors can walk through every Cypher query above (Rule 12).

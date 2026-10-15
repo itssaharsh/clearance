@@ -37,7 +37,7 @@ export async function conflictPathsFor(nodeKey: string): Promise<ConflictPath[]>
   // Indirect: party -(connector*1..2, any direction)- entity -> matter
   const indirect = await roQuery<RawPath>(
     `MATCH p = (a {key: $key})-[:${CONNECTOR}*1..2]-(b)-[t:${TERMINAL}]->(m:Matter)
-     WHERE a <> b
+     WHERE id(a) <> id(b)
      RETURN [n IN nodes(p) | n.name] AS nodeNames,
             [n IN nodes(p) | labels(n)[0]] AS nodeKinds,
             [r IN relationships(p) | type(r)] AS relTypes,

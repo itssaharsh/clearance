@@ -8,9 +8,6 @@ const failingExtractor: Extractor = {
   async extractParties() {
     throw new ExtractUnavailableError("simulated timeout");
   },
-  async embed() {
-    return new Array(16).fill(0);
-  },
 };
 
 describe("intake pipeline failure path (AC-4: fails closed)", () => {
@@ -30,9 +27,6 @@ describe("intake pipeline failure path (AC-4: fails closed)", () => {
       mode: "mock",
       async extractParties() {
         return [{ name: "Tern Freight", kind: "org", role: "prospective_client" }];
-      },
-      async embed() {
-        return new Array(16).fill(0.25);
       },
     };
     const report = await runIntakePipeline(
