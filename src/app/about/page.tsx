@@ -96,8 +96,8 @@ export default function AboutPage() {
         <ol className="mt-3 list-decimal space-y-2 pl-5 text-sm text-ink">
           <li>
             Open <Link href="/intake" className="font-medium text-accent underline">New intake</Link>, click
-            &ldquo;Warehouse suit (the hero case)&rdquo;, run the check. Two conflict paths draw on, beside the
-            name-search exhibit that found less.
+            &ldquo;Warehouse suit (the hero case)&rdquo;, run the check. Three connection paths draw on, beside the
+            name-search exhibit that found one.
           </li>
           <li>Approve the proposed ethical wall, signing as Mara Quinn. The wall is written into the graph.</li>
           <li>Run the same intake again: the path now shows the standing wall instead of a raw conflict.</li>
