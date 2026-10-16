@@ -94,6 +94,10 @@ Optional: `ANTHROPIC_API_KEY` for live extraction (`EXTRACTOR=mock` forces the d
 - Rate limits are in-memory per instance (fine for a demo; a real deployment would move them to the graph).
 - No auth by design: judges must not sign in. A real firm deployment would add it.
 
+## Build notes
+
+How this was built, including the two failures that shaped the design (an embedding matcher that collapsed at production directory size, and a process that printed PASS and never exited): [docs/blog.md](docs/blog.md). Decision records and the failure log live in [docs/memory/](docs/memory/).
+
 ## AI-tool disclosure (Rule 11)
 
 Built with Claude Code (planning, code, tests, review); all graph modelling, queries and architecture decisions are documented in `ARCHITECTURE.md` and explained in the demo. The authors can walk through every Cypher query above (Rule 12).
