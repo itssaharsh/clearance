@@ -10,7 +10,7 @@ Clearance is a conflicts-of-interest gate for small law firms. The firm's histor
 | Graph layer | connection handling, `roQuery` (3 s timeout, bounded reads), write ops | `falkordb` npm 6.8.0 | fails closed: everything blocked, banner shown |
 | Entity resolution | exact normalized match auto-matches; near-matches (surname + initials, whole-word containment) block and ask | pure TypeScript, no model | an unresolvable name keeps the matter blocked |
 | Path engine | conflict paths up to 3 hops, wall enforcement, name-search baseline | openCypher | a query error blocks the matter, never clears it |
-| Extractor port | parties and roles from intake text | `LLMExtractor` (Anthropic) or `MockExtractor` (deterministic), selected by `EXTRACTOR` | refusal, malformed output, timeout or quota all land as "blocked: extraction unavailable" |
+| Extractor port | parties and roles from intake text | `LLMExtractor` (Featherless or Anthropic) or `MockExtractor` (deterministic), selected by `EXTRACTOR` | refusal, malformed output, timeout or quota all land as "blocked: extraction unavailable" |
 | Corpus generator + loader | synthetic firm with planted conflicts, idempotent `UNWIND ... MERGE`, reset | TypeScript script, seeded RNG | regenerate; it is deterministic |
 | Eval script | planted-conflict recall, graph vs literal name search | `npm run eval` | n/a (read-only) |
 
@@ -29,7 +29,7 @@ flowchart LR
 | Service | Used for | On failure | Limits |
 |---|---|---|---|
 | FalkorDB Cloud (or local Docker) | the only store | fail closed: banner, nothing clears, health route reports it | free tier |
-| Anthropic API | party extraction only | falls back to blocked-with-reason; `EXTRACTOR=mock` runs with no key at all | capped at 20 LLM calls/day in the deployed demo |
+| Featherless (or Anthropic) API | party extraction only | falls back to blocked-with-reason; `EXTRACTOR=mock` runs with no key at all | capped at 20 LLM calls/day in the deployed demo |
 | Vercel | hosting | README carries local run instructions | 4.5 MB request body (not reached) |
 
 ## Key decisions
@@ -48,7 +48,7 @@ Extractor down: intake degrades to "blocked, retry". Graph down: the app goes re
 
 ## Deployment
 
-Vercel, production only. Secrets live in Vercel env vars (`FALKORDB_URL`, `ANTHROPIC_API_KEY`, `EXTRACTOR`, `RESET_TOKEN`); none are in the repo. Deploy with `vercel deploy --prod`. Rollback is Vercel's previous deployment. Seed or reset the demo firm with `npm run seed` or `POST /api/admin/reset` (token-gated).
+Vercel, production only. Secrets live in Vercel env vars (`FALKORDB_URL`, `FEATHERLESS_API_KEY`, `EXTRACTOR`, `RESET_TOKEN`); none are in the repo. Deploy with `vercel deploy --prod`. Rollback is Vercel's previous deployment. Seed or reset the demo firm with `npm run seed` or `POST /api/admin/reset` (token-gated).
 
 ## Observability
 

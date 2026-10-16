@@ -118,8 +118,8 @@ export default function AboutPage() {
           <li>The firm is synthetic and seeded, built for the hackathon. No real client data is involved.</li>
           <li>Traversals stop at three hops by design; a longer chain is noise, not signal, for this decision.</li>
           <li>
-            Extraction runs in deterministic mock mode by default; an LLM extractor sits behind the same interface.
-            Either way, extraction only proposes names. The graph decides.
+            The live demo extracts parties with a 72B open model (Qwen, via Featherless), capped per day and
+            falling back to a deterministic mock. Either way, extraction only proposes names. The graph decides.
           </li>
           <li>This is a hackathon build, not legal advice and not a system of record.</li>
         </ul>

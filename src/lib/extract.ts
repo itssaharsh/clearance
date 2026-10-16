@@ -66,31 +66,56 @@ const LLMParties = z.object({
   parties: z.array(z.object({ name: z.string(), kind: PartyKind, role: PartyRole })).min(1),
 });
 
+const EXTRACT_PROMPT =
+  'Extract the parties from a law-firm intake note. Reply with ONLY JSON: {"parties":[{"name":string,"kind":"person"|"org","role":"prospective_client"|"adverse"|"other"}]}. Include every person and organisation referred to by a proper name. Never include generic descriptions such as "a new client" or "the firm". No commentary.';
+
 export class LLMExtractor implements Extractor {
   readonly mode = "llm" as const;
 
   async extractParties(text: string): Promise<Party[]> {
-    const key = process.env.ANTHROPIC_API_KEY;
-    if (!key) throw new ExtractUnavailableError("no API key configured");
+    const featherless = process.env.FEATHERLESS_API_KEY;
+    const anthropic = process.env.ANTHROPIC_API_KEY;
+    if (!featherless && !anthropic) throw new ExtractUnavailableError("no API key configured");
     consumeLlmBudget();
     const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(), 8_000);
+    const timer = setTimeout(() => controller.abort(), 20_000);
     try {
-      const res = await fetch("https://api.anthropic.com/v1/messages", {
-        method: "POST",
-        signal: controller.signal,
-        headers: { "content-type": "application/json", "x-api-key": key, "anthropic-version": "2023-06-01" },
-        body: JSON.stringify({
-          model: process.env.ANTHROPIC_MODEL ?? "claude-haiku-5-5",
-          max_tokens: 700,
-          system:
-            'Extract the parties from a law-firm intake note. Reply with ONLY JSON: {"parties":[{"name":string,"kind":"person"|"org","role":"prospective_client"|"adverse"|"other"}]}. Include every person and organisation named. No commentary.',
-          messages: [{ role: "user", content: text.slice(0, 10_000) }],
-        }),
-      });
-      if (!res.ok) throw new ExtractUnavailableError(`provider ${res.status}`);
-      const body = (await res.json()) as { content?: Array<{ type: string; text?: string }> };
-      const raw = body.content?.find((c) => c.type === "text")?.text ?? "";
+      let raw: string;
+      if (featherless) {
+        // OpenAI-compatible endpoint (Featherless)
+        const res = await fetch("https://api.featherless.ai/v1/chat/completions", {
+          method: "POST",
+          signal: controller.signal,
+          headers: { "content-type": "application/json", authorization: `Bearer ${featherless}` },
+          body: JSON.stringify({
+            model: process.env.LLM_MODEL ?? "Qwen/Qwen2.5-72B-Instruct",
+            max_tokens: 700,
+            temperature: 0,
+            messages: [
+              { role: "system", content: EXTRACT_PROMPT },
+              { role: "user", content: text.slice(0, 10_000) },
+            ],
+          }),
+        });
+        if (!res.ok) throw new ExtractUnavailableError(`provider ${res.status}`);
+        const body = (await res.json()) as { choices?: Array<{ message?: { content?: string } }> };
+        raw = body.choices?.[0]?.message?.content ?? "";
+      } else {
+        const res = await fetch("https://api.anthropic.com/v1/messages", {
+          method: "POST",
+          signal: controller.signal,
+          headers: { "content-type": "application/json", "x-api-key": anthropic!, "anthropic-version": "2023-06-01" },
+          body: JSON.stringify({
+            model: process.env.ANTHROPIC_MODEL ?? "claude-haiku-5-5",
+            max_tokens: 700,
+            system: EXTRACT_PROMPT,
+            messages: [{ role: "user", content: text.slice(0, 10_000) }],
+          }),
+        });
+        if (!res.ok) throw new ExtractUnavailableError(`provider ${res.status}`);
+        const body = (await res.json()) as { content?: Array<{ type: string; text?: string }> };
+        raw = body.content?.find((c) => c.type === "text")?.text ?? "";
+      }
       const json = raw.slice(raw.indexOf("{"), raw.lastIndexOf("}") + 1);
       const parsed = LLMParties.safeParse(JSON.parse(json));
       if (!parsed.success) throw new ExtractUnavailableError("malformed model output");
@@ -110,5 +135,6 @@ export function selectExtractor(): Extractor {
   if (pref === "mock") return new MockExtractor();
   // credit-safe: beyond the daily live budget, extraction falls back to the deterministic mock
   if (pref === "llm") return llmBudgetAvailable() ? new LLMExtractor() : new MockExtractor();
-  return process.env.ANTHROPIC_API_KEY && llmBudgetAvailable() ? new LLMExtractor() : new MockExtractor();
+  const hasKey = process.env.FEATHERLESS_API_KEY || process.env.ANTHROPIC_API_KEY;
+  return hasKey && llmBudgetAvailable() ? new LLMExtractor() : new MockExtractor();
 }

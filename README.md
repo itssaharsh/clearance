@@ -73,7 +73,7 @@ Clearance is an agent with one irreversible action, opening a matter, and a huma
 
 ## Where the model is, and where it is not
 
-The LLM does exactly one job: reading the parties out of a messy intake note (`src/lib/extract.ts`; a deterministic mock ships for demo-safe, key-free operation; `/api/health` reports which is live). Everything that decides is model-free and replayable: entity resolution is three auditable rules (an exact normalized name auto-matches; a shared surname with matching initials, or an org name whose every word appears in a record's name, asks the attorney once and is remembered as an `ALIAS_OF` edge; everything else is new), and the verdict is the traversal above. The model cannot talk the gate open: uncertain identity blocks, a graph outage blocks, and only a signature clears.
+The LLM does exactly one job: reading the parties out of a messy intake note (`src/lib/extract.ts`). The deployed demo runs live extraction (Qwen2.5-72B via Featherless, capped per day); a deterministic mock ships for key-free local runs and is the fallback beyond the cap. `/api/health` reports which is live. Everything that decides is model-free and replayable: entity resolution is three auditable rules (an exact normalized name auto-matches; a shared surname with matching initials, or an org name whose every word appears in a record's name, asks the attorney once and is remembered as an `ALIAS_OF` edge; everything else is new), and the verdict is the traversal above. The model cannot talk the gate open: uncertain identity blocks, a graph outage blocks, and only a signature clears.
 
 ## Run it
 
@@ -85,7 +85,7 @@ npm run dev         # http://localhost:3000
 npm run eval        # planted-conflict recall: graph vs name search, one command
 npm test            # unit suite;  npm run test:int needs FALKORDB_URL
 ```
-Optional: `ANTHROPIC_API_KEY` for live extraction (`EXTRACTOR=mock` forces the deterministic mock; live calls are capped per day), `RESET_TOKEN` to enable `POST /api/admin/reset`.
+Optional: `FEATHERLESS_API_KEY` or `ANTHROPIC_API_KEY` for live extraction (`LLM_MODEL` picks the model, default `Qwen/Qwen2.5-72B-Instruct`; `EXTRACTOR=mock` forces the deterministic mock; live calls are capped per day), `RESET_TOKEN` to enable `POST /api/admin/reset`.
 
 ## Honest limits
 
