@@ -59,37 +59,37 @@ async function runCheck(page: import("playwright").Page, beat: string) {
   // Beat 1: the queue, one blocked matter already waiting (the hook)
   mark("B1 queue");
   await page.goto(BASE + "/");
-  await hold(10_000);
+  await hold(13_500);
 
   // Beat 2: the hero intake; extraction is the model's only job
   mark("B2 intake");
   await page.goto(`${BASE}/intake`);
-  await hold(1500);
+  await hold(2000);
   await page.getByRole("button", { name: "Warehouse suit (the hero case)" }).click();
-  await hold(2500);
+  await hold(3000);
   await runCheck(page, "2-hero");
 
   // Beat 3: the drawn paths with provenance
   mark("B3 paths");
-  await hold(12_000);
+  await hold(15_500);
 
   // Beat 4: the exhibit beside them, the product with FalkorDB taken out
   mark("B4 baseline");
-  await hold(9_000);
+  await hold(12_300);
 
   // Beat 5: the wall decision, written back as a record
   mark("B5 wall");
   await page.getByPlaceholder("Attorney name (signs the record)").fill("Mara Quinn");
   await hold(1200);
   await page.getByRole("button", { name: "Approve wall" }).click();
-  await hold(7_000);
+  await hold(9_000);
 
   // Beat 6: re-run the hero; the standing wall shows on the path
   mark("B6 rerun-wall");
   await page.goto(`${BASE}/intake`);
   await page.getByRole("button", { name: "Warehouse suit (the hero case)" }).click();
   await runCheck(page, "6-wall-recheck");
-  await hold(8_000);
+  await hold(8_500);
 
   // Beat 7: the staged failure; ambiguous name fails closed, is resolved once
   mark("B7 ambiguous");
@@ -97,13 +97,13 @@ async function runCheck(page: import("playwright").Page, beat: string) {
   await page.getByRole("button", { name: "Ambiguous name (watch it fail closed)" }).click();
   await hold(1200);
   await runCheck(page, "7-ambiguous");
-  await hold(7_000);
+  await hold(7_500);
   mark("B7b resolve");
   await page.getByText(`is Robert T. Kane`, { exact: false }).first().click();
   await page.getByPlaceholder("Attorney name (signs the record)").fill("Daniel Osei");
   await hold(1200);
   await page.getByRole("button", { name: "Decline the matter" }).click();
-  await hold(5_000);
+  await hold(4_500);
 
   // Beat 8: ask once; the same text again, no question asked this time
   mark("B8 rerun-remembered");
@@ -111,14 +111,14 @@ async function runCheck(page: import("playwright").Page, beat: string) {
   await page.locator("textarea").fill(AMBIG);
   await hold(1000);
   await runCheck(page, "8-askonce");
-  await hold(8_000);
+  await hold(7_800);
 
   // Beat 9: Ask the firm, cited subgraph answers
   mark("B9 ask");
   await page.goto(`${BASE}/ask`);
   await hold(1000);
   await page.getByRole("button", { name: "Ask", exact: true }).click();
-  await hold(7_000);
+  await hold(9_200);
 
   // Beat 10: close on the scorecard
   mark("B10 about");
@@ -128,7 +128,7 @@ async function runCheck(page: import("playwright").Page, beat: string) {
     const h = [...document.querySelectorAll("h2")].find((e) => e.textContent?.includes("Why a graph"));
     h?.scrollIntoView({ behavior: "smooth", block: "start" });
   });
-  await hold(8_000);
+  await hold(10_200);
   mark("END");
 
   await ctx.close();
