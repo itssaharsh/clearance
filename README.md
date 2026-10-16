@@ -100,4 +100,4 @@ How this was built, including the two failures that shaped the design (an embedd
 
 ## AI-tool disclosure (Rule 11)
 
-Built with Claude Code (planning, code, tests, review); all graph modelling, queries and architecture decisions are documented in `ARCHITECTURE.md` and explained in the demo. The authors can walk through every Cypher query above (Rule 12).
+Built with Claude Code (planning, code, tests, review); all graph modelling, queries and architecture decisions are documented in `ARCHITECTURE.md` and explained in the demo. The demo video is narrated by a synthetic voice (neural TTS) reading the author's script, with burned-in captions. The authors can walk through every Cypher query above (Rule 12).
