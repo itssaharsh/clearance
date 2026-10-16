@@ -14,7 +14,7 @@ export default async function MatterPage({ params }: { params: Promise<{ id: str
   } catch {
     return (
       <div className="rounded-lg border border-danger/40 bg-danger-container p-6 text-sm text-danger">
-        Firm graph unavailable — Clearance fails closed; this matter stays blocked until the graph is back.
+        Firm graph unavailable. Clearance fails closed: this matter stays blocked until the graph is back.
       </div>
     );
   }
@@ -53,7 +53,7 @@ export default async function MatterPage({ params }: { params: Promise<{ id: str
         {report.uncertain.length > 0 && (
           <p className="mt-2 rounded-md border border-caution/50 bg-surface-2 p-2 text-sm text-caution">
             Uncertain identity: {report.uncertain.map((u) => `“${u.party.name}” (closest: ${u.canonicalName ?? "—"}, ${Math.round(u.confidence * 100)}%)`).join("; ")}. The system
-            does not guess — an attorney resolves this at sign-off, and the answer is remembered.
+            does not guess: an attorney resolves this at sign-off, and the answer is remembered.
           </p>
         )}
       </section>

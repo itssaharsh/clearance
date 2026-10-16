@@ -16,7 +16,7 @@ export interface Extractor {
 }
 
 // ---------------------------------------------------------------- Mock ----
-// Deterministic: same text in, same parties out — demo-safe and unit-testable.
+// Deterministic: same text in, same parties out; demo-safe and unit-testable.
 
 const ORG_HINTS = /\b(llc|inc|ltd|corp|co|group|logistics|holdings|partners|build|builders|law|labs|systems)\b\.?$/i;
 

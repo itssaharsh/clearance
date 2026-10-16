@@ -1,21 +1,21 @@
-# Architecture — Clearance
+# Architecture
 
-Mode: hackathon. Last structural change: 2026-10-15 (ADR-0001..0004).
-
-## Overview
-Conflicts-of-interest gate for small law firms. The firm's history is a FalkorDB property graph; intake text is LLM-extracted into parties; entity resolution fails closed; deterministic k≤3 Cypher path queries decide conflict/clean; matters stay blocked until an attorney signs; signatures, walls and aliases write back. One Next.js deployable on Vercel; FalkorDB is the only datastore.
+Clearance is a conflicts-of-interest gate for small law firms. The firm's history lives in a FalkorDB property graph. Intake text is turned into parties by an extractor, names are resolved against the graph by deterministic rules that fail closed, and bounded openCypher traversals draw every connection path up to three hops. A matter stays blocked until an attorney signs the drawn paths; signatures, ethical walls and alias resolutions are written back into the same graph. One Next.js deployable on Vercel. FalkorDB is the only datastore.
 
 ## Components
-| Component | Responsibility | Tech | Why it exists (requirement) | When it fails |
-|---|---|---|---|---|
-| Web app + API | UI (queue, intake, matter, ask) + route handlers | Next.js 16, TS, Tailwind | MUST journeys J1–J3; Rule 10 live deployment | Vercel error page; health route |
-| Graph layer | connection, `roQuery` (3 s timeout, LIMIT), write ops | `falkordb` npm 6.8.0 | Rule 2/3: graph is the product's core | fails closed: everything blocked + banner (AC on offline state) |
-| Path engine | k≤3 conflict paths, wall enforcement, baseline name-search | openCypher | AC-1/2/6; the wedge | query error ⇒ blocked, never cleared |
-| Extractor port | parties from intake text; name embeddings | `LLMExtractor` (Anthropic) / `MockExtractor` (deterministic) | AC-3/4; A-2 key gap; credit-safe demo | refusal/malformed/timeout/quota ⇒ blocked "extraction unavailable" |
-| Corpus generator + loader | synthetic firm, planted conflicts, idempotent UNWIND…MERGE, reset | TS script, seeded RNG | Rule 6; AC-8/12 | regenerate (deterministic) |
-| Eval script | planted-conflict recall: graph vs name baseline | TS script | AC-8; README table; H30 one command | n/a (read-only) |
+
+| Component | Responsibility | Tech | When it fails |
+|---|---|---|---|
+| Web app + API | UI (queue, intake, matter, ask, about) and route handlers | Next.js 16, TypeScript, Tailwind | Vercel error page; `/api/health` reports graph state |
+| Graph layer | connection handling, `roQuery` (3 s timeout, bounded reads), write ops | `falkordb` npm 6.8.0 | fails closed: everything blocked, banner shown |
+| Entity resolution | exact normalized match auto-matches; near-matches (surname + initials, whole-word containment) block and ask | pure TypeScript, no model | an unresolvable name keeps the matter blocked |
+| Path engine | conflict paths up to 3 hops, wall enforcement, name-search baseline | openCypher | a query error blocks the matter, never clears it |
+| Extractor port | parties and roles from intake text | `LLMExtractor` (Anthropic) or `MockExtractor` (deterministic), selected by `EXTRACTOR` | refusal, malformed output, timeout or quota all land as "blocked: extraction unavailable" |
+| Corpus generator + loader | synthetic firm with planted conflicts, idempotent `UNWIND ... MERGE`, reset | TypeScript script, seeded RNG | regenerate; it is deterministic |
+| Eval script | planted-conflict recall, graph vs literal name search | `npm run eval` | n/a (read-only) |
 
 ## Data flow
+
 ```mermaid
 flowchart LR
   U[Office manager] --> W[Next.js UI] --> A[API routes]
@@ -25,26 +25,35 @@ flowchart LR
 ```
 
 ## External services
-| Service | Used for | Failure mode | Fallback | Limits |
-|---|---|---|---|---|
-| FalkorDB (Cloud free tier or Docker) | the only store | unreachable/timeout | fail closed; banner; health | free-tier limits unverified (A-1) |
-| Anthropic API (or AI Gateway) | extraction + embeddings | refusal/malformed/timeout/quota | MockExtractor (`EXTRACTOR=mock`); 20 calls/day cap live | key pending (A-2) |
-| Vercel | hosting | deploy/runtime errors | local run instructions (Rule 10 allows) | 4.5 MB body (fine) |
+
+| Service | Used for | On failure | Limits |
+|---|---|---|---|
+| FalkorDB Cloud (or local Docker) | the only store | fail closed: banner, nothing clears, health route reports it | free tier |
+| Anthropic API | party extraction only | falls back to blocked-with-reason; `EXTRACTOR=mock` runs with no key at all | capped at 20 LLM calls/day in the deployed demo |
+| Vercel | hosting | README carries local run instructions | 4.5 MB request body (not reached) |
 
 ## Key decisions
-- ADR-0001 Next.js single deployable on Vercel + falkordb npm client (vs FastAPI/Python second service): one deployable, judge opens one URL.
-- ADR-0002 Extractor behind a port with deterministic mock (vs LLM-only): credit-safe demo, testable fails-closed paths, key can arrive late.
-- ADR-0003 Custom SVG path cards (vs graph-viz library): paths are ≤3 hops; full control of the judged visual; no heavy dep. FalkorDB Browser covers the whole-graph view in the demo.
-- ADR-0004 Fails-closed gate semantics everywhere (uncertain ⇒ blocked; infra down ⇒ blocked): control-and-safety criterion; the one staged failure.
+
+Full records live in [docs/memory/decisions/](docs/memory/decisions/); failures that shaped the design are in [docs/memory/failures/](docs/memory/failures/).
+
+- **ADR-0001** One Next.js deployable with the `falkordb` npm client, instead of a separate Python service. A judge opens one URL.
+- **ADR-0002** Extractor behind a port with a deterministic mock. The demo spends no credits, the fails-closed paths are testable, and an API key can arrive late without blocking the build.
+- **ADR-0003** Custom SVG path cards instead of a graph-viz library. Paths are at most three hops; drawing them by hand gives full control of the judged visual with no heavy dependency.
+- **ADR-0004** Fails-closed gate semantics everywhere. Uncertain identity blocks. Infrastructure down blocks. This is the product's safety claim, so it is also the demo's staged failure.
+- **Resolution is lexical rules, not embeddings.** The first version used small hash embeddings for name similarity; at realistic directory sizes (about 120 names) unrelated names scored 0.78 to 0.93 and the matcher was unusable (failure record F-0003). It was replaced with exact normalized matching plus two explainable near-match rules, and nothing inexact ever auto-matches.
 
 ## Failure boundaries
-Extractor down → J1 degrades to "blocked, retry"; graph down → app read-only banner, nothing clears; Vercel down → local setup instructions in README. No retries that could double-write: decision POST idempotent (matter state checked), loader MERGE-idempotent. The model can populate the graph, never clear a matter.
+
+Extractor down: intake degrades to "blocked, retry". Graph down: the app goes read-only with a banner and nothing clears. No retries that could double-write: the decision endpoint is idempotent (matter state is checked first) and the loader is MERGE-idempotent. The model can propose parties; it can never clear a matter.
 
 ## Deployment
-Vercel (prod only, hackathon). Secrets: Vercel env (`FALKORDB_URL`, `ANTHROPIC_API_KEY`, `EXTRACTOR`, `RESET_TOKEN`). Deploy: `vercel deploy --prod` after gates. Rollback: Vercel previous deployment. Seed/reset: `POST /api/admin/reset` (token).
+
+Vercel, production only. Secrets live in Vercel env vars (`FALKORDB_URL`, `ANTHROPIC_API_KEY`, `EXTRACTOR`, `RESET_TOKEN`); none are in the repo. Deploy with `vercel deploy --prod`. Rollback is Vercel's previous deployment. Seed or reset the demo firm with `npm run seed` or `POST /api/admin/reset` (token-gated).
 
 ## Observability
-Structured console logs per API route (Vercel logs); `/api/health` (graph ping + mode); eval output in README.
+
+Structured console logs per API route (Vercel logs), `/api/health` (graph ping plus extractor mode), and the eval table in the README.
 
 ## Known tradeoffs
-No auth (single demo firm — judges must not sign in). Integration tests require a live FalkorDB (A-1): unit tests cover pure logic until the URL exists. Vector index optional in mock mode (alias logic still demonstrates resolution).
+
+No auth: it is a single synthetic demo firm and judges should not have to sign in. Integration tests need a live FalkorDB; unit tests cover the pure logic without one. Traversals stop at three hops on purpose: for this decision a longer chain is noise.

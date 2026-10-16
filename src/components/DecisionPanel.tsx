@@ -51,7 +51,7 @@ export function DecisionPanel({ report, proposal }: { report: MatterReport; prop
       }
       router.refresh();
     } catch {
-      setError("Request failed — nothing was signed. Retry.");
+      setError("Request failed. Nothing was signed; retry.");
     } finally {
       setBusy(null);
     }
@@ -66,7 +66,7 @@ export function DecisionPanel({ report, proposal }: { report: MatterReport; prop
 
       {report.uncertain.length > 0 && (
         <div className="mt-3 rounded-md border border-caution/50 bg-surface-2 p-3">
-          <p className="text-xs font-semibold text-caution">Resolve uncertain identities first (remembered — never asked again):</p>
+          <p className="text-xs font-semibold text-caution">Resolve uncertain identities first (remembered, never asked again):</p>
           {report.uncertain.map((u) => (
             <div key={u.party.name} className="mt-2 text-sm">
               <span className="font-medium">“{u.party.name}”</span>

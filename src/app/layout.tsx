@@ -10,7 +10,7 @@ const mono = Spline_Sans_Mono({ subsets: ["latin"], variable: "--ff-mono" });
 export const metadata: Metadata = {
   title: "Clearance",
   description:
-    "Name search finds 'Kane Logistics'. Clearance finds the subsidiary suing your client two hops away — and won't open the matter until a lawyer signs the path it drew.",
+    "Name search finds 'Kane Logistics'. Clearance finds the subsidiary suing your client two hops away, and won't open the matter until a lawyer signs the path it drew.",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
@@ -27,6 +27,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               <Link className="hover:text-ink" href="/">Queue</Link>
               <Link className="hover:text-ink" href="/intake">New intake</Link>
               <Link className="hover:text-ink" href="/ask">Ask the firm</Link>
+              <Link className="hover:text-ink" href="/about">About</Link>
             </nav>
           </div>
         </header>

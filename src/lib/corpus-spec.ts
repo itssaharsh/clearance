@@ -1,4 +1,4 @@
-// Synthetic firm corpus — deterministic, hand-authored planted conflicts plus
+// Synthetic firm corpus: deterministic, hand-authored planted conflicts plus
 // seeded procedural filler. Entirely fictional (Rule 6). The PLANTED manifest
 // is the ground truth the eval script (AC-8) scores against.
 
@@ -39,23 +39,23 @@ export const PLANTED_NODES: NodeSpec[] = [
   // 1) Corporate family: Meridian Build (new adverse) -> subsidiary of Meridian Group (current client M-012)
   { label: "Org", key: "org_meridian_group", name: "Meridian Group" },
   { label: "Org", key: "org_meridian_build", name: "Meridian Build" },
-  { label: "Matter", key: "m012", title: "Meridian Group — lease portfolio restructuring", year: 2025, status: "active" },
+  { label: "Matter", key: "m012", title: "Meridian Group - lease portfolio restructuring", year: 2025, status: "active" },
 
   // 2) Declined consult: Kane Logistics LLC consulted in 2024, declined; officer Robert T. Kane
   { label: "Org", key: "org_kane", name: "Kane Logistics LLC" },
   { label: "Person", key: "p_rkane", name: "Robert T. Kane" },
-  { label: "Matter", key: "m031", title: "Declined consultation — freight contract dispute", year: 2024, status: "closed" },
+  { label: "Matter", key: "m031", title: "Declined consultation - freight contract dispute", year: 2024, status: "closed" },
 
   // 3) Alias chain: Northgate & Co renamed to Northgate Partners; adverse in M-008
   { label: "Org", key: "org_northgate_new", name: "Northgate Partners" },
   { label: "Org", key: "org_northgate_old", name: "Northgate & Co" },
-  { label: "Matter", key: "m008", title: "Hartwell v. Northgate Partners — construction defect", year: 2023, status: "closed" },
+  { label: "Matter", key: "m008", title: "Hartwell v. Northgate Partners - construction defect", year: 2023, status: "closed" },
   { label: "Org", key: "org_hartwell", name: "Hartwell Property Trust" },
 
   // 4) Related person: Elena Vasquez is married to current client Marco Vasquez (M-019)
   { label: "Person", key: "p_marco", name: "Marco Vasquez" },
   { label: "Person", key: "p_elena", name: "Elena Vasquez" },
-  { label: "Matter", key: "m019", title: "Marco Vasquez — equity partner buy-in", year: 2026, status: "active" },
+  { label: "Matter", key: "m019", title: "Marco Vasquez - equity partner buy-in", year: 2026, status: "active" },
 
   // Decoy: similar name that must NOT match (resolution precision)
   { label: "Org", key: "org_kane_sons", name: "Kane & Sons Plumbing" },
@@ -135,7 +135,7 @@ export const EVAL_INTAKES: EvalIntake[] = [
     id: "e7",
     title: "Direct repeat client check",
     text: "Marco Vasquez returns: he wants to sue his co-investor Dmitri Aronov over the buy-in.",
-    expectPaths: [{ kind: "direct_adversity", via: "Marco Vasquez is a current client (M-019) — same-side check" }],
+    expectPaths: [{ kind: "direct_adversity", via: "Marco Vasquez is a current client (M-019): same-side check" }],
     baselineFinds: 1,
   },
   {
@@ -189,7 +189,7 @@ export function buildFiller(): { nodes: NodeSpec[]; edges: EdgeSpec[] } {
     const aKey = `${mKey}_a`;
     const aName = `${ORG_A[Math.floor(rnd() * ORG_A.length)]} ${ORG_B[Math.floor(rnd() * ORG_B.length)]}`;
     const work = WORK[Math.floor(rnd() * WORK.length)];
-    nodes.push({ label: "Matter", key: mKey, title: `${cName} — ${work}`, year, status: rnd() < 0.3 ? "active" : "closed" });
+    nodes.push({ label: "Matter", key: mKey, title: `${cName} - ${work}`, year, status: rnd() < 0.3 ? "active" : "closed" });
     nodes.push(clientIsOrg ? { label: "Org", key: cKey, name: cName } : { label: "Person", key: cKey, name: cName });
     nodes.push({ label: "Org", key: aKey, name: aName });
     edges.push({ type: "CLIENT_IN", from: cKey, to: mKey, source: `engagement letter ${mKey.toUpperCase()}`, since: `${year}-03` });

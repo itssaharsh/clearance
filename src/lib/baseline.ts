@@ -3,7 +3,7 @@ import { BaselineResult } from "./schemas";
 
 /**
  * The incumbent: a literal name search over party names attached to matters.
- * Shown beside the graph result (AC-2). Finds only exact-substring name hits —
+ * Shown beside the graph result (AC-2). Finds only exact-substring name hits,
  * which is the point.
  */
 export async function baselineSearch(name: string): Promise<BaselineResult> {

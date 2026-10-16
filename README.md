@@ -2,11 +2,11 @@
 
 **Name search finds "Kane Logistics". Clearance finds the subsidiary suing your client two hops away, and won't open the matter until a lawyer signs the path it drew.**
 
-**Live:** https://clearance-chi.vercel.app (opens signed out, seeded) · **Stack:** FalkorDB + Next.js
+**Live:** https://clearance-chi.vercel.app (opens signed out, seeded) · **Product story:** [clearance-chi.vercel.app/about](https://clearance-chi.vercel.app/about) · **Stack:** FalkorDB + Next.js
 
 ![The matter report: drawn conflict paths with provenance beside the name-search baseline](docs/matter-report.png)
 
-Conflicts of interest are the leading cause of legal-malpractice claims, and most small firms still check them with a shared spreadsheet and memory. Clearance is a conflicts-of-interest gate: the firm's history lives in a FalkorDB graph, a new inquiry is checked by deterministic multi-hop traversal, and the matter stays blocked until an attorney signs the drawn risk. The signature, the wall and every resolved identity are written back: the graph is the firm's record.
+Conflicts of interest are a leading cause of legal-malpractice claims, and most small firms still check them with a shared spreadsheet and memory. Clearance is a conflicts-of-interest gate: the firm's history lives in a FalkorDB graph, a new inquiry is checked by deterministic multi-hop traversal, and the matter stays blocked until an attorney signs the drawn risk. The signature, the wall and every resolved identity are written back: the graph is the firm's record.
 
 Built for **Graph Hacks: Context for AI Agents** (WeMakeDevs × FalkorDB, Oct 15-18 2026). Tracks: **Agents That Act on Connected Data**, **Agent Memory and Coordination**, and **Company Brain**. This repository was created on 15 Oct 2026, inside the event window; no project code predates the start. The first commit (c4138e4) is timestamped Thu 15 Oct 16:59 +05:30 (2026-10-15T11:29:35Z), after the build opened at Thu 15 Oct 00:01 +05:30. Idea notes and graph-model sketches (allowed before the start by Rule 8) live outside this repository.
 

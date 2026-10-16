@@ -93,10 +93,10 @@ export async function decideMatter(id: string, input: z.infer<typeof DecisionReq
   if (req.action === "wall") {
     const screened = req.screened ?? [];
     if (screened.length === 0) throw new DecisionError("a wall needs at least one screened attorney");
-    // M2 fix: a wall that silently screens nobody is worse than no wall — verify every name
+    // M2 fix: a wall that silently screens nobody is worse than no wall; verify every name
     const known = await roQuery<{ name: string }>(`MATCH (a:Attorney) WHERE a.name IN $names RETURN a.name AS name LIMIT 50`, { names: screened });
     const missing = screened.filter((s) => !known.some((k) => k.name === s));
-    if (missing.length > 0) throw new DecisionError(`unknown attorney name(s): ${missing.join(", ")} — the wall was not created`);
+    if (missing.length > 0) throw new DecisionError(`unknown attorney name(s): ${missing.join(", ")}. The wall was not created`);
     const matters = [...new Set(report.paths.map((p) => p.hops[p.hops.length - 1].to))];
     await writeQuery(
       `MATCH (i:Intake {key: $id})
@@ -135,7 +135,7 @@ export async function decideMatter(id: string, input: z.infer<typeof DecisionReq
 
 function decisionLine(req: z.infer<typeof DecisionRequest>, at: string): string {
   const when = at.slice(0, 16).replace("T", " ");
-  if (req.action === "clear") return `cleared by ${req.by} at ${when} — signed with the drawn paths on record`;
+  if (req.action === "clear") return `cleared by ${req.by} at ${when}, signed with the drawn paths on record`;
   if (req.action === "decline") return `declined by ${req.by} at ${when}`;
-  return `ethical wall approved by ${req.by} at ${when} — screened: ${(req.screened ?? []).join(", ")}`;
+  return `ethical wall approved by ${req.by} at ${when}. Screened: ${(req.screened ?? []).join(", ")}`;
 }

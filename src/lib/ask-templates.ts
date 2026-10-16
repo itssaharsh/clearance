@@ -2,7 +2,7 @@ import { roQuery } from "./graph";
 import { AskResult } from "./schemas";
 
 /**
- * T06 "Ask the firm" (Track 03): canned, parameterised Cypher templates — no
+ * T06 "Ask the firm" (Track 03): canned, parameterised Cypher templates, no
  * free-form text-to-Cypher. Every answer is a drawn subgraph whose every claim
  * cites a matter (AC-10). A judge can't break it; a judge CAN replay it.
  */
@@ -56,7 +56,7 @@ export const ASK_TEMPLATES: AskTemplate[] = [
     id: "wall_screen",
     question: (p) => `Who would an ethical wall around “${p}” need to screen?`,
     paramLabel: "Matter name",
-    defaultParam: "Meridian Group — lease portfolio restructuring",
+    defaultParam: "Meridian Group - lease portfolio restructuring",
     cypher: `MATCH (att:Attorney)-[w:WORKED_ON]->(m:Matter) WHERE toLower(m.name) CONTAINS toLower($param)
              RETURN DISTINCT att.name AS a, 'Attorney' AS aKind, 'WORKED_ON' AS rel, w.source AS source,
                     m.name AS b, 'Matter' AS bKind, att.name AS attorney

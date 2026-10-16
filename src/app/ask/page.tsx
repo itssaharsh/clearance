@@ -7,7 +7,7 @@ const TEMPLATES: Array<{ id: string; label: string; paramLabel: string | null; d
   { id: "touched_family", label: "Who has ever touched a … entity?", paramLabel: "Organisation", defaultParam: "Meridian Group" },
   { id: "attorney_history", label: "Which attorney has history with …?", paramLabel: "Person or org", defaultParam: "Northgate Partners" },
   { id: "declined", label: "Whom have we declined, and where is that recorded?", paramLabel: null, defaultParam: "" },
-  { id: "wall_screen", label: "Who would a wall around … need to screen?", paramLabel: "Matter", defaultParam: "Meridian Group — lease portfolio restructuring" },
+  { id: "wall_screen", label: "Who would a wall around … need to screen?", paramLabel: "Matter", defaultParam: "Meridian Group - lease portfolio restructuring" },
 ];
 
 const KIND_TONE: Record<string, string> = {
@@ -36,7 +36,7 @@ export default function AskPage() {
       }
       setResult(body);
     } catch {
-      setError("Request failed — retry.");
+      setError("Request failed; retry.");
     } finally {
       setBusy(false);
     }
@@ -46,7 +46,7 @@ export default function AskPage() {
     <div className="mx-auto max-w-3xl">
       <h1 className="font-display text-2xl tracking-tight">Ask the firm</h1>
       <p className="mt-1 text-sm text-ink-muted">
-        Institutional memory as queries: every answer is a subgraph, and every claim cites the matter it comes from. No free-form chat — the same question returns the same answer, twice.
+        Institutional memory as queries: every answer is a subgraph, and every claim cites the matter it comes from. No free-form chat; the same question returns the same answer, twice.
       </p>
 
       <div className="mt-4 flex flex-wrap gap-2">
@@ -102,7 +102,7 @@ export default function AskPage() {
               <ul className="mt-3 space-y-1 border-t border-line pt-2">
                 {result.edges.map((e, i) => (
                   <li key={i} className="text-xs text-ink-muted">
-                    <span className="font-medium text-ink">{e.from}</span> —{e.rel.toLowerCase().replace(/_/g, " ")}→{" "}
+                    <span className="font-medium text-ink">{e.from}</span> ({e.rel.toLowerCase().replace(/_/g, " ")}) →{" "}
                     <span className="font-medium text-ink">{e.to}</span>
                     {e.source && <span className="text-ink-muted/70"> · source: {e.source}</span>}
                   </li>

@@ -20,7 +20,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     return Response.json(report);
   } catch (e) {
     if (e instanceof DecisionError) return Response.json({ error: e.message }, { status: 409 });
-    if (e instanceof GraphUnavailableError) return Response.json({ error: "graph unavailable — nothing clears while the firm graph is down" }, { status: 503 });
+    if (e instanceof GraphUnavailableError) return Response.json({ error: "graph unavailable: nothing clears while the firm graph is down" }, { status: 503 });
     throw e;
   }
 }

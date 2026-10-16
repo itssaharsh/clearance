@@ -1,4 +1,4 @@
-// CLI: npm run seed — wipes and reloads the demo firm graph. Requires FALKORDB_URL.
+// CLI: npm run seed. Wipes and reloads the demo firm graph. Requires FALKORDB_URL.
 import { resetGraph } from "../src/lib/corpus-load";
 
 resetGraph()

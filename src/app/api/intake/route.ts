@@ -4,7 +4,7 @@ import { allowIntake, clientIp } from "@/lib/ratelimit";
 
 export async function POST(request: Request) {
   if (!allowIntake(clientIp(request))) {
-    return Response.json({ error: "rate limit: 5 intakes per minute — wait a moment" }, { status: 429 });
+    return Response.json({ error: "rate limit: 5 intakes per minute. Wait a moment" }, { status: 429 });
   }
   const len = Number(request.headers.get("content-length") ?? 0);
   if (len > 12_000) return Response.json({ error: "intake too large (10 KB cap)" }, { status: 413 });

@@ -79,10 +79,10 @@ export async function runIntakePipeline(input: z.infer<typeof IntakeRequest>, op
 
     const blockedReason =
       uncertain.length > 0
-        ? `uncertain identity: ${uncertain.map((u) => u.party.name).join(", ")} — needs review`
+        ? `uncertain identity: ${uncertain.map((u) => u.party.name).join(", ")}. Needs review`
         : paths.length > 0
-          ? `${paths.length} connection path(s) found — needs attorney sign-off`
-          : "no conflict found — awaiting attorney sign-off";
+          ? `${paths.length} connection path(s) found. Needs attorney sign-off`
+          : "no conflict found. Awaiting attorney sign-off";
 
     const report = MatterReport.parse({ ...base, parties: resolved, paths, baseline, uncertain, blockedReason });
     await persistReport(report);

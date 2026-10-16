@@ -70,7 +70,7 @@ async function runCheck(page: import("playwright").Page, beat: string) {
   await page.goto(BASE + "/");
   await hold(2000); // queue shows WALLED
 
-  // Beat 3: re-run the hero — the standing wall shows on the path
+  // Beat 3: re-run the hero; the standing wall shows on the path
   await page.goto(`${BASE}/intake`);
   await page.getByRole("button", { name: "Warehouse suit (the hero case)" }).click();
   await runCheck(page, "3-wall-recheck");
@@ -82,7 +82,7 @@ async function runCheck(page: import("playwright").Page, beat: string) {
   await page.getByRole("button", { name: "Ask", exact: true }).click();
   await hold(3000); // cited subgraph
 
-  // Beat 5: the staged failure — ambiguous name fails closed, then is resolved and remembered
+  // Beat 5: the staged failure; ambiguous name fails closed, then is resolved and remembered
   await page.goto(`${BASE}/intake`);
   await page.getByRole("button", { name: "Ambiguous name (watch it fail closed)" }).click();
   await runCheck(page, "5-ambiguous");
@@ -93,7 +93,7 @@ async function runCheck(page: import("playwright").Page, beat: string) {
   await page.getByRole("button", { name: "Decline the matter" }).click();
   await hold(2500); // declined; alias remembered
 
-  // Beat 6: ask once — the same text again, no question asked this time
+  // Beat 6: ask once; the same text again, no question asked this time
   await page.goto(`${BASE}/intake`);
   await page.locator("textarea").fill(AMBIG);
   await runCheck(page, "6-askonce");

@@ -65,3 +65,9 @@ video-script.md
 yarn-debug.log*
 yarn-error.log*
 takes/
+
+# internal build tooling, not part of the judged product
+.prod-build/
+UI-SPEC.md
+AGENTS.md
+CLAUDE.md

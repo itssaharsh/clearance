@@ -46,7 +46,7 @@ export function PathCard({ path }: { path: ConflictPath }) {
         <span className="text-sm font-medium text-ink">{kindLabel}</span>
         {path.wall ? (
           <span className="text-xs font-medium text-wall">
-            ethical wall in place since {path.wall.since} (screened: {path.wall.screened.join(", ") || "—"}) — approved by {path.wall.by}
+            ethical wall in place since {path.wall.since} (screened: {path.wall.screened.join(", ") || "none listed"}), approved by {path.wall.by}
           </span>
         ) : (
           path.waivable && <span className="text-xs text-ink-muted">waivable with consent</span>
@@ -70,7 +70,7 @@ export function PathCard({ path }: { path: ConflictPath }) {
       <ul className="mt-3 space-y-1 border-t border-line pt-2">
         {path.hops.map((h, i) => (
           <li key={i} className="text-xs text-ink-muted">
-            {h.explanation} <span className="font-mono text-[11px] text-ink-muted/70">— source: {h.source} ({h.since})</span>
+            {h.explanation} <span className="font-mono text-[11px] text-ink-muted/70">[source: {h.source}, {h.since}]</span>
           </li>
         ))}
       </ul>

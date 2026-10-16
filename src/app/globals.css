@@ -1,6 +1,6 @@
 @import "tailwindcss";
 
-/* Clearance — direction: warm legal paper, blue-black ink, blue-ink-signature accent.
+/* Clearance. Direction: warm legal paper, blue-black ink, blue-ink-signature accent.
    Derived in UI-SPEC.md; conflict marks are data tones, separate from the accent. */
 :root {
   color-scheme: light;

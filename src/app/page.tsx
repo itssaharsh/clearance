@@ -31,7 +31,7 @@ export default async function QueuePage() {
       <div className="mb-6 flex items-end justify-between">
         <div>
           <h1 className="font-display text-2xl tracking-tight">Clearance queue</h1>
-          <p className="mt-1 text-sm text-ink-muted">No matter opens until the graph says clean — or a lawyer signs the path it drew.</p>
+          <p className="mt-1 text-sm text-ink-muted">No matter opens until the graph says clean, or a lawyer signs the path it drew.</p>
         </div>
         <Link href="/intake" className="rounded-md bg-accent px-4 py-2 text-sm font-semibold text-accent-ink hover:bg-[var(--accent-hover)]">
           New intake
@@ -42,14 +42,14 @@ export default async function QueuePage() {
         <div className="rounded-lg border border-line bg-surface-1 p-8 text-center">
           <p className="text-ink-muted">No matters yet.</p>
           <p className="mt-1 text-sm text-ink-muted">
-            Run a <Link href="/intake" className="underline">new intake</Link> — three sample inquiries are one click away.
+            Run a <Link href="/intake" className="underline">new intake</Link>; three sample inquiries are one click away.
           </p>
         </div>
       )}
 
       {blocked.length > 0 && (
         <section className="mb-8">
-          <h2 className="mb-2 text-sm font-semibold uppercase tracking-wide text-conflict">Blocked — needs attorney review</h2>
+          <h2 className="mb-2 text-sm font-semibold uppercase tracking-wide text-conflict">Blocked: needs attorney review</h2>
           <ul className="space-y-2">
             {blocked.map((m) => (
               <li key={m.id}>

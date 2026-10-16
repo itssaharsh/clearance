@@ -99,7 +99,7 @@ function explainHop(rel: string, subtype: string, from: string, to: string): str
     case "DECLINED_CONSULT":
       return `${from} consulted us and was declined (${to})`;
     default:
-      return `${from} — ${rel} — ${to}`;
+      return `${from} ${rel} ${to}`;
   }
 }
 

@@ -39,12 +39,12 @@ export default function IntakePage() {
         return; // the pasted text is kept (retry state)
       }
       if (body.persisted === false) {
-        setError(body.blockedReason ?? "The check could not run — nothing was stored. Retry.");
+        setError(body.blockedReason ?? "The check could not run; nothing was stored. Retry.");
         return;
       }
       router.push(`/matter/${body.id}`);
     } catch {
-      setError("Request failed. Your text is kept — retry.");
+      setError("Request failed. Your text is kept; retry.");
     } finally {
       setBusy(false);
     }
@@ -87,7 +87,7 @@ export default function IntakePage() {
       >
         {busy ? "Reading the intake…" : "Run the conflicts check"}
       </button>
-      <p className="mt-2 text-xs text-ink-muted">Every check is recorded. Uncertain identities block the matter — the system never guesses.</p>
+      <p className="mt-2 text-xs text-ink-muted">Every check is recorded. Uncertain identities block the matter; the system never guesses.</p>
     </div>
   );
 }
