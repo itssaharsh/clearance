@@ -42,7 +42,7 @@ RETURN p, type(t) LIMIT 50
 ```
 2. **Indirect conflicts (the wedge)**: variable-length traversal through aliases, corporate families and personal relationships to the firm's history; this is the path a name search cannot see:
 ```cypher
-MATCH p = (a {key: $key})-[:ALIAS_OF|SUBSIDIARY_OF|RELATED_TO*1..2]-(b)-[t:CLIENT_IN|ADVERSE_IN|DECLINED_CONSULT]->(m:Matter)
+MATCH p = (a {key: $key})-[:ALIAS_OF|SUBSIDIARY_OF|RELATED_TO*1..2]-(b)-[t:CLIENT_IN|ADVERSE_IN|WITNESS_IN|DECLINED_CONSULT]->(m:Matter)
 WHERE id(a) <> id(b)
 RETURN p, type(t) LIMIT 50
 ```
