@@ -1,6 +1,6 @@
 # A name search found 6 of 10 conflicts. The graph found all 10.
 
-*Build notes from Graph Hacks: Context for AI Agents (WeMakeDevs x FalkorDB, October 15 to 18, 2026). The product, Clearance, is live at [clearance-chi.vercel.app](https://clearance-chi.vercel.app), and the code is at [github.com/pinectar/clearance](https://github.com/pinectar/clearance).*
+*Build notes from Graph Hacks: Context for AI Agents (WeMakeDevs x FalkorDB, October 15 to 18, 2026). The product, Clearance, is live at [clearance-chi.vercel.app](https://clearance-chi.vercel.app), and the code is at [github.com/itssaharsh/clearance](https://github.com/itssaharsh/clearance).*
 
 Before a law firm takes a new client, someone has to answer one question: have we ever been on the other side? Big firms buy software for this. Small firms mostly keep a spreadsheet, and the check is ctrl-F plus whoever has been at the firm longest. The scary miss is not the client you already know about. It is the subsidiary of your client, suing under a different name, or the man you declined as a client last year turning up as an officer of the company now asking for help. Ctrl-F cannot see any of that, because none of it shares a string with the intake email. The connection only exists as a relationship, and missed conflicts are a leading cause of malpractice claims.
 
