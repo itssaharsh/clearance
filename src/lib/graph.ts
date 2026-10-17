@@ -4,6 +4,9 @@ import { FalkorDB, Graph } from "falkordb";
 export const GRAPH_ID = process.env.FALKORDB_GRAPH ?? "firm_demo";
 
 const READ_TIMEOUT_MS = 3_000;
+// TIMEOUT above is enforced by FalkorDB itself; a dead socket never replies, so the
+// client needs its own deadline or a request waits forever instead of failing closed.
+const CLIENT_DEADLINE_MS = 6_000;
 
 /** Raised when FalkorDB is unreachable or a query times out. Callers fail closed. */
 export class GraphUnavailableError extends Error {
@@ -22,20 +25,48 @@ function connectionOptions() {
   const normalized = url.replace(/^falkor(s?):\/\//, (_m, s) => (s ? "rediss://" : "redis://"));
   const u = new URL(normalized);
   return {
-    socket: { host: u.hostname, port: Number(u.port || 6379), tls: u.protocol === "rediss:" ? true : undefined },
+    socket: {
+      host: u.hostname,
+      port: Number(u.port || 6379),
+      tls: u.protocol === "rediss:" ? true : undefined,
+      connectTimeout: 5_000,
+    },
     password: u.password || undefined,
     username: u.username || undefined,
   } as Parameters<typeof FalkorDB.connect>[0];
 }
 
+/** Drop the cached connection so the next call reconnects instead of reusing a broken socket. */
+function resetClient(): void {
+  const stale = clientPromise;
+  clientPromise = null;
+  stale?.then((db) => db.close()).catch(() => undefined);
+}
+
 async function client(): Promise<FalkorDB> {
   if (!clientPromise) {
-    clientPromise = FalkorDB.connect(connectionOptions()).catch((e) => {
-      clientPromise = null; // allow retry on next call
-      throw new GraphUnavailableError(e);
-    });
+    clientPromise = FalkorDB.connect(connectionOptions())
+      .then((db) => {
+        db.on("error", () => resetClient());
+        return db;
+      })
+      .catch((e) => {
+        clientPromise = null; // allow retry on next call
+        throw new GraphUnavailableError(e);
+      });
   }
   return clientPromise;
+}
+
+function withDeadline<T>(p: Promise<T>): Promise<T> {
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  const deadline = new Promise<never>((_, reject) => {
+    timer = setTimeout(() => {
+      resetClient();
+      reject(new GraphUnavailableError(`no reply within ${CLIENT_DEADLINE_MS} ms`));
+    }, CLIENT_DEADLINE_MS);
+  });
+  return Promise.race([p, deadline]).finally(() => clearTimeout(timer));
 }
 
 export async function graph(): Promise<Graph> {
@@ -61,8 +92,8 @@ export function assertBoundedRead(cypher: string): void {
 export async function roQuery<T = Record<string, unknown>>(cypher: string, params?: Params): Promise<T[]> {
   assertBoundedRead(cypher);
   try {
-    const g = await graph();
-    const reply = await g.roQuery<T>(cypher, { params: params as never, TIMEOUT: READ_TIMEOUT_MS });
+    const g = await withDeadline(graph());
+    const reply = await withDeadline(g.roQuery<T>(cypher, { params: params as never, TIMEOUT: READ_TIMEOUT_MS }));
     return (reply.data ?? []) as T[];
   } catch (e) {
     if (e instanceof GraphUnavailableError) throw e;
@@ -73,8 +104,8 @@ export async function roQuery<T = Record<string, unknown>>(cypher: string, param
 /** Write query (MERGE/CREATE/SET). Writes are the gate's records; they must be explicit and idempotent. */
 export async function writeQuery<T = Record<string, unknown>>(cypher: string, params?: Params): Promise<T[]> {
   try {
-    const g = await graph();
-    const reply = await g.query<T>(cypher, { params: params as never, TIMEOUT: READ_TIMEOUT_MS });
+    const g = await withDeadline(graph());
+    const reply = await withDeadline(g.query<T>(cypher, { params: params as never, TIMEOUT: READ_TIMEOUT_MS }));
     return (reply.data ?? []) as T[];
   } catch (e) {
     if (e instanceof GraphUnavailableError) throw e;

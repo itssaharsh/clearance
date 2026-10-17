@@ -45,11 +45,13 @@ describe("graph read guard (AC-11)", () => {
 
 describe("selectExtractor", () => {
   it("falls back to mock without a key", () => {
-    const old = { k: process.env.ANTHROPIC_API_KEY, e: process.env.EXTRACTOR };
+    const old = { k: process.env.ANTHROPIC_API_KEY, f: process.env.FEATHERLESS_API_KEY, e: process.env.EXTRACTOR };
     delete process.env.ANTHROPIC_API_KEY;
+    delete process.env.FEATHERLESS_API_KEY;
     delete process.env.EXTRACTOR;
     expect(selectExtractor().mode).toBe("mock");
     if (old.k) process.env.ANTHROPIC_API_KEY = old.k;
+    if (old.f) process.env.FEATHERLESS_API_KEY = old.f;
     if (old.e) process.env.EXTRACTOR = old.e;
   });
 });
