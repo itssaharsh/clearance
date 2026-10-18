@@ -10,7 +10,7 @@ Clearance is a conflicts-of-interest gate for small law firms. The firm's histor
 | Graph layer | connection handling, `roQuery` (3 s timeout, bounded reads), write ops | `falkordb` npm 6.8.0 | fails closed: everything blocked, banner shown |
 | Entity resolution | exact normalized match auto-matches; near-matches (surname + initials, whole-word containment) block and ask | pure TypeScript, no model | an unresolvable name keeps the matter blocked |
 | Path engine | conflict paths up to 3 hops, wall enforcement, name-search baseline | openCypher | a query error blocks the matter, never clears it |
-| Extractor port | parties and roles from intake text | `LLMExtractor` (Featherless or Anthropic) or `MockExtractor` (deterministic), selected by `EXTRACTOR` | refusal, malformed output, timeout or quota all land as "blocked: extraction unavailable" |
+| Extractor port | parties and roles from intake text | `LLMExtractor` (Featherless or Anthropic) or `MockExtractor` (deterministic), selected by `EXTRACTOR` | a model that misses its 10 s deadline, errors or is over the daily cap hands the intake to `MockExtractor`; only if both fail does the matter land as "blocked: extraction unavailable" |
 | Corpus generator + loader | synthetic firm with planted conflicts, idempotent `UNWIND ... MERGE`, reset | TypeScript script, seeded RNG | regenerate; it is deterministic |
 | Eval script | planted-conflict recall, graph vs literal name search | `npm run eval` | n/a (read-only) |
 
@@ -29,7 +29,7 @@ flowchart LR
 | Service | Used for | On failure | Limits |
 |---|---|---|---|
 | FalkorDB Cloud (or local Docker) | the only store | fail closed: banner, nothing clears, health route reports it | free tier |
-| Featherless (or Anthropic) API | party extraction only | falls back to blocked-with-reason; `EXTRACTOR=mock` runs with no key at all | capped at 20 LLM calls/day in the deployed demo |
+| Featherless (or Anthropic) API | party extraction only | falls back to the deterministic extractor after 10 s, blocked-with-reason only if that fails too; `EXTRACTOR=mock` runs with no key at all | capped at 20 LLM calls/day in the deployed demo |
 | Vercel | hosting | README carries local run instructions | 4.5 MB request body (not reached) |
 
 ## Key decisions
@@ -44,7 +44,7 @@ Full records live in [docs/memory/decisions/](docs/memory/decisions/); failures 
 
 ## Failure boundaries
 
-Extractor down: intake degrades to "blocked, retry". Graph down: the app goes read-only with a banner and nothing clears. No retries that could double-write: the decision endpoint is idempotent (matter state is checked first) and the loader is MERGE-idempotent. The model can propose parties; it can never clear a matter.
+Extractor down: the deterministic extractor proposes the names instead, and if that also fails, intake degrades to "blocked, retry". Graph down: the app goes read-only with a banner and nothing clears. No retries that could double-write: the decision endpoint is idempotent (matter state is checked first) and the loader is MERGE-idempotent. The model can propose parties; it can never clear a matter.
 
 ## Deployment
 

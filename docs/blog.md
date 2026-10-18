@@ -62,7 +62,7 @@ A second query runs beside the traversal, and it is deliberately weak: a literal
 
 ## The model proposes. The graph decides.
 
-There is an LLM in the pipeline, and it has exactly one job: reading party names and roles out of a messy intake note. The live demo runs Qwen2.5-72B through Featherless for that. Behind the same interface sits a deterministic mock, so every test is replayable and the product runs with no API key at all.
+There is an LLM in the pipeline, and it has exactly one job: reading party names and roles out of a messy intake note. The live demo runs Qwen2.5-72B through Featherless for that. Behind the same interface sits a deterministic extractor, so every test is replayable and the product runs with no API key at all. It also takes over whenever the model has not answered within 10 seconds.
 
 Everything after extraction is model-free. Entity resolution is three rules you can read in one sitting. An exact normalized name is the only automatic match. A shared surname with compatible initials, or an organisation name whose every word appears in a record, makes the gate ask a human. Anything else is new. The verdict is the traversal above.
 
@@ -127,6 +127,7 @@ The test that proves it starts a TCP server that accepts the connection and neve
 - Turbopack tried to bundle the client and the build died with `a.BigInt is not a function`. Listing `falkordb`, `redis` and `@redis/client` in `serverExternalPackages` fixed it.
 - Two integration test files ran in parallel, and each reset the shared cloud graph the other was reading. One line in the vitest config: `fileParallelism: false`.
 - My own mock extractor cut "pursue R. Kane" off at the period after the R, because the sentence splitter thought the sentence had ended.
+- On the last morning, the first check after the site sat idle came back "extraction unavailable: timeout". The provider had unloaded the 72B model overnight, and reloading it took longer than my 20-second limit. A loaded model answers in about 3 seconds, so the live extractor now waits 10 and then hands the intake to the deterministic extractor. Extraction only proposes names, so the gate is no weaker for it.
 
 ## Measured: 10 versus 6, and what that does not claim
 

@@ -14,6 +14,19 @@ Built for **Graph Hacks: Context for AI Agents** (WeMakeDevs × FalkorDB, Oct 15
 
 One FalkorDB graph per firm (`firm_demo` in the demo; multi-graph tenancy is the isolation story).
 
+```mermaid
+flowchart LR
+  N["New party<br/>(:Person / :Org)"] -- "ALIAS_OF · SUBSIDIARY_OF · RELATED_TO<br/>1 to 2 hops, either direction" --> E["Known entity<br/>(:Person / :Org)"]
+  E -- "CLIENT_IN · ADVERSE_IN<br/>WITNESS_IN · DECLINED_CONSULT" --> M["(:Matter)<br/>the firm's history"]
+  A["(:Attorney)"] -- "WORKED_ON" --> M
+  W["(:Wall)"] -- "AROUND" --> M
+  W -- "SCREENED_BY" --> A
+  W -- "GUARDS" --> I["(:Intake)<br/>the new inquiry"]
+  C["(:Clearance)<br/>signed decision"] -- "CLEARS" --> I
+```
+
+A conflict check walks the chain from New party to Matter: one or two identity and relationship hops, then one hop into the firm's matter history (query 2 below). The Wall and Clearance nodes are the gate's own record, written back by attorney decisions and read by every later check.
+
 ```
 (:Person|:Org {key, name})          people and organisations, incl. attorney-confirmed alias nodes
 (:Attorney {key, name})             the firm's lawyers
@@ -73,7 +86,7 @@ Clearance is an agent with one irreversible action, opening a matter, and a huma
 
 ## Where the model is, and where it is not
 
-The LLM does exactly one job: reading the parties out of a messy intake note (`src/lib/extract.ts`). The deployed demo runs live extraction (Qwen2.5-72B via Featherless, capped per day); a deterministic mock ships for key-free local runs and is the fallback beyond the cap. `/api/health` reports which is live. Everything that decides is model-free and replayable: entity resolution is three auditable rules (an exact normalized name auto-matches; a shared surname with matching initials, or an org name whose every word appears in a record's name, asks the attorney once and is remembered as an `ALIAS_OF` edge; everything else is new), and the verdict is the traversal above. The model cannot talk the gate open: uncertain identity blocks, a graph outage blocks, and only a signature clears.
+The LLM does exactly one job: reading the parties out of a messy intake note (`src/lib/extract.ts`). The deployed demo runs live extraction (Qwen2.5-72B via Featherless, capped per day); a deterministic extractor ships for key-free local runs and takes over whenever the model misses a 10-second deadline (a cold model after idle), errors, or the daily cap is reached. `/api/health` reports which is live. Everything that decides is model-free and replayable: entity resolution is three auditable rules (an exact normalized name auto-matches; a shared surname with matching initials, or an org name whose every word appears in a record's name, asks the attorney once and is remembered as an `ALIAS_OF` edge; everything else is new), and the verdict is the traversal above. The model cannot talk the gate open: uncertain identity blocks, a graph outage blocks, and only a signature clears.
 
 ## Run it
 

@@ -72,13 +72,15 @@ const EXTRACT_PROMPT =
 export class LLMExtractor implements Extractor {
   readonly mode = "llm" as const;
 
+  constructor(private readonly timeoutMs = 20_000) {}
+
   async extractParties(text: string): Promise<Party[]> {
     const featherless = process.env.FEATHERLESS_API_KEY;
     const anthropic = process.env.ANTHROPIC_API_KEY;
     if (!featherless && !anthropic) throw new ExtractUnavailableError("no API key configured");
     consumeLlmBudget();
     const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(), 20_000);
+    const timer = setTimeout(() => controller.abort(), this.timeoutMs);
     try {
       let raw: string;
       if (featherless) {
@@ -130,11 +132,41 @@ export class LLMExtractor implements Extractor {
 
 }
 
+/**
+ * The model first; if it fails for any reason (a cold model that misses the deadline,
+ * a provider error, malformed output), the deterministic extractor proposes the names
+ * instead. Extraction only ever proposes names, so the gate is no weaker either way.
+ */
+export class FallbackExtractor implements Extractor {
+  readonly mode = "llm" as const;
+
+  constructor(
+    private readonly primary: Extractor,
+    private readonly fallback: Extractor,
+  ) {}
+
+  async extractParties(text: string): Promise<Party[]> {
+    try {
+      return await this.primary.extractParties(text);
+    } catch (e) {
+      if (!(e instanceof ExtractUnavailableError)) throw e;
+      return this.fallback.extractParties(text);
+    }
+  }
+}
+
+// a loaded model answers in ~3 s; a cold one can take longer than a judge should wait
+const LLM_DEADLINE_MS = 10_000;
+
+function liveExtractor(): Extractor {
+  return new FallbackExtractor(new LLMExtractor(LLM_DEADLINE_MS), new MockExtractor());
+}
+
 export function selectExtractor(): Extractor {
   const pref = process.env.EXTRACTOR;
   if (pref === "mock") return new MockExtractor();
   // credit-safe: beyond the daily live budget, extraction falls back to the deterministic mock
-  if (pref === "llm") return llmBudgetAvailable() ? new LLMExtractor() : new MockExtractor();
+  if (pref === "llm") return llmBudgetAvailable() ? liveExtractor() : new MockExtractor();
   const hasKey = process.env.FEATHERLESS_API_KEY || process.env.ANTHROPIC_API_KEY;
-  return hasKey && llmBudgetAvailable() ? new LLMExtractor() : new MockExtractor();
+  return hasKey && llmBudgetAvailable() ? liveExtractor() : new MockExtractor();
 }
