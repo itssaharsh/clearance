@@ -12,6 +12,7 @@ So I built Clearance. The firm's history lives in a FalkorDB graph, every new in
 
 - **Live:** [clearance-chi.vercel.app](https://clearance-chi.vercel.app) (opens signed out, with a seeded demo firm)
 - **Code:** [github.com/itssaharsh/clearance](https://github.com/itssaharsh/clearance)
+- **Demo video (1:55):** [youtu.be/Mfif01H4wzI](https://youtu.be/Mfif01H4wzI)
 
 ![The hero case: three connection paths drawn, beside a name search that found one hit](blog-images/hero-paths.jpg)
 

@@ -2,7 +2,7 @@
 
 **Name search finds "Kane Logistics". Clearance finds the subsidiary suing your client two hops away, and won't open the matter until a lawyer signs the path it drew.**
 
-**Live:** https://clearance-chi.vercel.app (opens signed out, seeded) · **Product story:** [clearance-chi.vercel.app/about](https://clearance-chi.vercel.app/about) · **Stack:** FalkorDB + Next.js
+**Demo video (1:55):** https://youtu.be/Mfif01H4wzI · **Live:** https://clearance-chi.vercel.app (opens signed out, seeded) · **Product story:** [clearance-chi.vercel.app/about](https://clearance-chi.vercel.app/about) · **Stack:** FalkorDB + Next.js
 
 ![The matter report: drawn conflict paths with provenance beside the name-search baseline](docs/matter-report.png)
 
